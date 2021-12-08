@@ -9,6 +9,7 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState()
+  // const [currentUserData, setCurrentUserData] = useState()
   const [loading, setLoading] = useState(true)
 
   function signup(email, password, name, role) {
@@ -50,6 +51,14 @@ export function AuthProvider({ children }) {
     if (isSubscribed) {
       setLoading(true)
       auth.onAuthStateChanged((user) => {
+        // if(user){
+        //   database.users.where("email", "==", user.email).onSnapshot(snapshot => {
+        //     var data = snapshot.docs.map(database.formatDoc)
+        //     setCurrentUserData(data)
+        //   })
+        // } else{
+        //   setCurrentUserData(null)
+        // }
         setCurrentUser(user)
         setLoading(false)
       })
@@ -59,6 +68,7 @@ export function AuthProvider({ children }) {
 
   const value = {
     currentUser,
+    // currentUserData,
     login,
     signup,
     logout,

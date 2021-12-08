@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import { Table, Button, Modal, Form, Input } from 'antd';
+import { Table, Button, Modal, Form, Input, message } from 'antd';
 
 import { database } from '../../authConfig/firebase';
 import { useAuth } from '../../authConfig/AuthContext';
@@ -39,6 +39,7 @@ export default function DashboardPMO() {
       try {
         await signup(values.email, passDefeault, values.name, "pm")
         // navigate("/")
+        message.success("Success Add PM")
       } catch {
       }
       form.resetFields()

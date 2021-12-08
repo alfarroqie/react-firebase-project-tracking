@@ -1,5 +1,5 @@
 import React, { useState, useEffect} from 'react';
-import { Table, Space, Button, Modal, Form, Input, Alert } from 'antd';
+import { Table, Space, Button, Modal, Form, Input, message } from 'antd';
 
 import { useAuth } from '../../authConfig/AuthContext';
 import { database, storage } from '../../authConfig/firebase';
@@ -7,8 +7,6 @@ import { database, storage } from '../../authConfig/firebase';
 export default function DashboardPM() {
   const {currentUser} = useAuth()
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState()
-  const [success, setSuccess] = useState()
   
   const [dataProject, setDataProject] = useState()
   const [modalUploadPP, setModalUploadPP] = useState(false)
@@ -97,13 +95,16 @@ export default function DashboardPM() {
                 })
             })
         })
-        setLoading(false)
-        setSuccess("Success Upload File")
+        // setLoading(false)
+        message.success("Success Upload File")
         form.resetFields()
       } catch(err){
-        setError("Failed Upload File")
-        setLoading(false)
+        message.error("Failed Upload File")
+        // setLoading(false)
       }
+      setLoading(false)
+      setModalUploadPP(false)
+
     }
     
     return(
@@ -115,19 +116,6 @@ export default function DashboardPM() {
       footer={null}
       onCancel={() => setModalUploadPP(false)}
     >
-      {error && <Alert
-                message="Error"
-                description={error}
-                type="error"
-                showIcon
-            />
-      } {success && <Alert
-                  message="Success"
-                  description={success}
-                  type="success"
-                  showIcon
-                  />
-      }
       <Form
           form={form}
             layout="vertical"

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react"
 // import { Link, Navigate } from "react-router-dom"
-import {Form, Button, Card, Input, DatePicker, Select, Alert} from "antd"
+import {Form, Button, Card, Input, DatePicker, Select, message, } from "antd"
 import { database } from '../../authConfig/firebase';
 
+import emailjs from 'emailjs-com'
+
 export default function FormProject() {
-    const [error, setError] = useState()
     const [loading, setLoading] = useState(false)
     const [dataPM, setDataPM] = useState([])
 
@@ -37,28 +38,33 @@ export default function FormProject() {
                 "codeProject": values.codeProject,
                 "customer": values.customer,
                 "contractNumber": values.contractNumber,
-                "startDate": values['startDate'].format('YYYY-MM-DD'),
-                "endDate": values['endDate'].format('YYYY-MM-DD'),
+                "startDate": values['startDate'].format('DD-MM-YYYY'),
+                "endDate": values['endDate'].format('DD-MM-YYYY'),
                 "projectManager": values.pm,
                 "projectStatus": "Waiting for Submit Project Plan"
             })
+            const dataEmail = {
+                to_email: values.pm,
+                message: `Code Project: ${values.codeProject} <br>
+                          Customer: ${values.customer}<br>
+                          Contract Number: ${values.contractNumber}<br>
+                          Start Date: ${values['startDate'].format('DD-MM-YYYY')}<br>
+                          End Date: ${values['endDate'].format('DD-MM-YYYY')}<br>
+                          `
+            }
+            emailjs.send('notif-app', 'newproject', dataEmail, 'user_jG4QPq3HFQpprBfuLL0ej')
+              .then(function(response) {
+                console.log('SUCCESS!', response.status, response.text);
+              }, function(error) {
+                console.log('FAILED...', error);
+            });
+        message.success("Success Add New Project")
         form.resetFields()
-        setLoading(false)
         } catch(err){
-            setError("Failed add to database")
-            setLoading(false)
+            message.error("Failed Add New Project")
         }
-        // const dataEmail = {
-        //     to_email: values.pm,
-        //     message: "You assign in new project. Please check the project tracker app. Thank you"
-        // }
-        // emailjs.send('sendinblue-project', 'newproject', dataEmail, 'user_27mG3zOgCiCICTmjLrhCY')
-        //   .then(function(response) {
-        //     console.log('SUCCESS!', response.status, response.text);
-        //   }, function(error) {
-        //     console.log('FAILED...', error);
-        // });
-        // setLoading(false)
+        
+        setLoading(false)
     };
 
     return (
@@ -66,13 +72,6 @@ export default function FormProject() {
       <div className="d-flex align-items-center justify-content-center"
       style={{ minHeight: "50vh" }}>
           <Card title="Create Project" bordered={true} style={{ width: "600px" }} >
-              {error && <Alert
-                message="Error"
-                description={error}
-                type="error"
-                showIcon
-            />
-            }
             <Form
                 form={form}
                 labelCol={{ span: 7 }}
