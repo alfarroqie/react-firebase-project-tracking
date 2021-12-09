@@ -17,7 +17,7 @@ export default function DashboardPM() {
   useEffect(() =>{
     let isSubscribed = true
     if (isSubscribed) {
-      database.projects.where("projectManager", "==", currentUser.email).onSnapshot(snapshot => {
+      database.projects.where("projectManager", "==", currentUser.userData.email).onSnapshot(snapshot => {
           var data = snapshot.docs.map(database.formatDoc)
           setDataProject(data)
       })

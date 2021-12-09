@@ -27,7 +27,7 @@ function AppPMO() {
     return(
       <Navigate to="/" />
     )
-  } else if (currentUser.displayName === "pmo"){
+  } else if (currentUser.userData.isPmo){
     return(
       <Navigate to="/pmo" />
     )

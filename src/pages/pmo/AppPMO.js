@@ -25,12 +25,12 @@ function AppPMO() {
       console.log(err)
     }
   }
-
+  
   if (!currentUser){
     return(
       <Navigate to="/"/>
     )
-  } else if (currentUser.displayName === "pm"){
+  } else if (!currentUser.userData.isPmo){
     return(
       <Navigate to="/pm" />
     )
@@ -48,7 +48,7 @@ function AppPMO() {
               theme="dark"
             >
               <Menu.Item key="dashboardPMO" icon={<DatabaseOutlined />}><Link to='/pmo'/>Project</Menu.Item>
-              <Menu.Item key="pmPMO" icon={<UserOutlined />}><Link to='/pmo/PM'/>Project</Menu.Item>
+              <Menu.Item key="pmPMO" icon={<UserOutlined />}><Link to='/pmo/PM'/>Project Manager</Menu.Item>
               <Menu.Item key="logoutPMO" icon={<LogoutOutlined />} onClick={handleLogout}>Logout</Menu.Item>
 
             </Menu>

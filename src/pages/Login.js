@@ -19,11 +19,11 @@ export default function Login() {
         setLoading(false)
       }
     };
-  if (currentUser && currentUser.displayName === "pmo"){
+  if (currentUser && currentUser.userData.isPmo){
     return (
       <Navigate to="/pmo" />
     )
-  } else if (currentUser && currentUser.displayName === "pm") {
+  } else if (currentUser && !currentUser.userData.isPmo) {
     return (
       <Navigate to="/pm" />
     )

@@ -15,11 +15,6 @@ export function AuthProvider({ children }) {
   function signup(email, password, name, role) {
     return auth.createUserWithEmailAndPassword(email, password)
     .then(() => {
-      const displayName = role
-      auth.currentUser.updateProfile({displayName})
-      
-    })
-    .then(() => {
       var pmoRole = false
       if (role === "pmo"){
         pmoRole = true
@@ -51,15 +46,13 @@ export function AuthProvider({ children }) {
     if (isSubscribed) {
       setLoading(true)
       auth.onAuthStateChanged((user) => {
-        // if(user){
-        //   database.users.where("email", "==", user.email).onSnapshot(snapshot => {
-        //     var data = snapshot.docs.map(database.formatDoc)
-        //     setCurrentUserData(data)
-        //   })
-        // } else{
-        //   setCurrentUserData(null)
-        // }
-        setCurrentUser(user)
+        if(user){
+          database.users.doc(user.uid).get().then(doc => {
+            setCurrentUser({userAuth: user, userData:{id:doc.id, ...doc.data()}})
+          })
+        } else{
+          setCurrentUser(user)
+        }
         setLoading(false)
       })
     }
@@ -68,7 +61,6 @@ export function AuthProvider({ children }) {
 
   const value = {
     currentUser,
-    // currentUserData,
     login,
     signup,
     logout,
