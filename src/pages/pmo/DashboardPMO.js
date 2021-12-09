@@ -1,5 +1,7 @@
 import React, {useState, useEffect} from 'react';
-import { Table, Button, Space, Form, Input, Modal, message } from 'antd';
+import { Table, Button, Space, Form, Input, Modal, message, Tooltip } from 'antd';
+import { CheckCircleOutlined, CloseCircleOutlined, BellOutlined } from '@ant-design/icons';
+
 import { Link } from "react-router-dom"
 
 import { database, storage } from '../../authConfig/firebase';
@@ -71,9 +73,18 @@ export default function DashboardPMO() {
       dataIndex: 'id',
       render: (text, record) => (
         <Space size="middle">
-          <Button disabled={!record.urlDownload || record.projectStatus !== "Waiting for Review"} onClick={() => {setModalApprove(true); setProjectChoose({key:record.key})}} type="primary">Approve</Button>
-          <Button disabled={!record.urlDownload || record.projectStatus !== "Waiting for Review"} onClick={() => {setModalReject(true); setProjectChoose({key:record.key})} } type="danger" >Reject</Button>
-          <Button disabled={!record.urlDownload || record.projectStatus !== "Waiting for Review"} onClick={() => {setModalReview(true); setProjectChoose({codeProject:record.codeProject, customer:record.customer, contractNumber: record.contractNumber, pm:record.projectManager})}} type="secondary" >Review</Button>
+          <Tooltip title="Approve">
+            <Button type="primary" shape="circle" icon={<CheckCircleOutlined />} disabled={!record.urlDownload || record.projectStatus !== "Waiting for Review"} onClick={() => {setModalApprove(true); setProjectChoose({key:record.key})}} />
+          </Tooltip>
+          <Tooltip title="Reject">
+            <Button type="danger" shape="circle" icon={<CloseCircleOutlined />} disabled={!record.urlDownload || record.projectStatus !== "Waiting for Review"} onClick={() => {setModalReject(true); setProjectChoose({key:record.key})}} />
+          </Tooltip>
+          <Tooltip title="Review">
+            <Button type="secondary" shape="circle" icon={<BellOutlined />} disabled={!record.urlDownload || record.projectStatus !== "Waiting for Review"} onClick={() => {setModalReview(true); setProjectChoose({codeProject:record.codeProject, customer:record.customer, contractNumber: record.contractNumber, pm:record.projectManager})}} />
+          </Tooltip>
+          {/* <Button disabled={!record.urlDownload || record.projectStatus !== "Waiting for Review"} onClick={() => {setModalApprove(true); setProjectChoose({key:record.key})}} type="primary">Approve</Button> */}
+          {/* <Button disabled={!record.urlDownload || record.projectStatus !== "Waiting for Review"} onClick={() => {setModalReject(true); setProjectChoose({key:record.key})}} type="danger" >Reject</Button> */}
+          {/* <Button disabled={!record.urlDownload || record.projectStatus !== "Waiting for Review"} onClick={() => {setModalReview(true); setProjectChoose({codeProject:record.codeProject, customer:record.customer, contractNumber: record.contractNumber, pm:record.projectManager})}} type="secondary" >Review</Button> */}
         </Space>
       ),
     },
@@ -129,10 +140,11 @@ export default function DashboardPMO() {
       emailjs.send('notif-app', 'review_pp', dataEmail, 'user_jG4QPq3HFQpprBfuLL0ej')
         .then(function(response) {
           console.log('SUCCESS!', response.status, response.text);
+          message.success(`Success send review email!`)
         }, function(error) {
           console.log('FAILED...', error);
+          message.error(`Failed send review email!`)
       });
-      message.success(`Success send review email!`)
       } catch(err) {
         console.log(err)
         message.error(`Failed send review email!`)

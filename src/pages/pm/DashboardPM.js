@@ -1,5 +1,6 @@
 import React, { useState, useEffect} from 'react';
-import { Table, Space, Button, Modal, Form, Input, message } from 'antd';
+import { Table, Space, Button, Modal, Form, Input, message, Tooltip } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
 
 import { useAuth } from '../../authConfig/AuthContext';
 import { database, storage } from '../../authConfig/firebase';
@@ -16,14 +17,14 @@ export default function DashboardPM() {
   // Data Project
   useEffect(() =>{
     let isSubscribed = true
-    if (isSubscribed) {
+    if (isSubscribed && currentUser) {
       database.projects.where("projectManager", "==", currentUser.userData.email).onSnapshot(snapshot => {
           var data = snapshot.docs.map(database.formatDoc)
           setDataProject(data)
       })
     }
     return () => isSubscribed = false
-  },[])
+  },[]) // eslint-disable-line react-hooks/exhaustive-deps
 
     //Columns for table
     const columns = [
@@ -71,7 +72,10 @@ export default function DashboardPM() {
       dataIndex: 'key',
       render: (text, record) => (
         <Space size="middle">
-          <Button type="primary" disabled={record.urlDownload} onClick={() => {setModalUploadPP(true); setProjectChoose({key: record.key, codeProject: record.codeProject})}} >Upload Project Plan</Button>
+          {/* <Button type="primary" disabled={record.urlDownload} onClick={() => {setModalUploadPP(true); setProjectChoose({key: record.key, codeProject: record.codeProject})}} >Upload Project Plan</Button> */}
+          <Tooltip title="Upload Project Plan">
+            <Button type="primary" shape="circle" icon={<UploadOutlined />} disabled={record.urlDownload} onClick={() => {setModalUploadPP(true); setProjectChoose({key: record.key, codeProject: record.codeProject})}} />
+          </Tooltip>
         </Space>
       ),
     },
@@ -88,15 +92,14 @@ export default function DashboardPM() {
 
         }, () => {
             uploadTask.snapshot.ref.getDownloadURL().then(url =>{
-                console.log(url)
                 database.projects.doc(projectChoose.key).update({
                     projectStatus: "Waiting for Review",
                     urlDownload: url
                 })
+                message.success("Success Upload File")
             })
         })
         // setLoading(false)
-        message.success("Success Upload File")
         form.resetFields()
       } catch(err){
         message.error("Failed Upload File")

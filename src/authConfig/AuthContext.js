@@ -57,7 +57,7 @@ export function AuthProvider({ children }) {
       })
     }
     return () => isSubscribed = false
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const value = {
     currentUser,
