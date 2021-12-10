@@ -48,7 +48,7 @@ export default function DashboardPMO() {
 
     return(
     <>
-      <Button type="primary" onClick={() => setModalAddPM(true)}> Add PM User </Button>
+      <Button type="primary" shape="round" onClick={() => setModalAddPM(true)}> Add PM User </Button>
       <Table columns={columns} dataSource={dataPM} size="middle"/>
       <Modal 
       title="Add Project Manager" 
