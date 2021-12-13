@@ -1,5 +1,5 @@
 import React, { useState, useEffect} from 'react';
-import { Table, Space, Button, Modal, Form, Input, message, Tooltip } from 'antd';
+import { Table, Space, Button, Modal, Form, Input, message, Tooltip, Tag } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 
 import { useAuth } from '../../authConfig/AuthContext';
@@ -31,6 +31,12 @@ export default function DashboardPM() {
     {
       title: 'Code Project',
       dataIndex: 'codeProject',
+      fixed:'left'
+    },
+    {
+      title: 'Project Name',
+      dataIndex: 'name',
+      fixed:'left'
     },
     {
       title: 'Customer',
@@ -55,29 +61,74 @@ export default function DashboardPM() {
     {
       title: 'Project Status',
       dataIndex: 'projectStatus',
-    },
-    {
-      title: 'Comment',
-      dataIndex: 'comment',
+      render: tags => (
+        <>
+          {new Array(tags).map(tag => {
+            let color
+            if (tag === 'In Progress') {
+              color = '';
+            } else if (tag === 'Not Started') {
+              color = 'red'
+            }
+            return (
+              <Tag color={color} key={tag}>
+                {tag}
+              </Tag>
+            );
+          })}
+        </>
+      ),
     },
     {
       title: 'Project Plan',
-      dataIndex: 'urlDownload',
-      render: (text, record) => (
-          <a href={record.urlDownload}>Download</a>
-      ),
-    },
-    {
-      title: 'Actions',
-      dataIndex: 'key',
-      render: (text, record) => (
-        <Space size="middle">
-          {/* <Button type="primary" disabled={record.urlDownload} onClick={() => {setModalUploadPP(true); setProjectChoose({key: record.key, codeProject: record.codeProject})}} >Upload Project Plan</Button> */}
-          <Tooltip title="Upload Project Plan">
-            <Button type="primary" shape="circle" icon={<UploadOutlined />} disabled={record.urlDownload} onClick={() => {setModalUploadPP(true); setProjectChoose({key: record.key, codeProject: record.codeProject})}} />
-          </Tooltip>
-        </Space>
-      ),
+      children:[
+        {
+          title: 'Status',
+          dataIndex: 'statusProjectPlan',
+          render: tags => (
+            <>
+              {new Array(tags).map(tag => {
+                let color
+                if (tag === 'Waiting for Submit') {
+                  color = 'red';
+                } else if (tag === 'Waiting for Review') {
+                  // color = ''
+                } else if (tag === 'Approved') {
+                  color = 'blue'
+                }
+                return (
+                  <Tag color={color} key={tag}>
+                    {tag}
+                  </Tag>
+                );
+              })}
+            </>
+          ),
+        },
+        {
+          title: 'Comment',
+          dataIndex: 'comment',
+        },
+        {
+          title: 'File',
+          dataIndex: 'urlDownload',
+          render: (text, record) => (
+              <a href={record.urlDownload}>Download</a>
+          ),
+        },
+        {
+          title: 'Actions',
+          dataIndex: 'key',
+          render: (text, record) => (
+            <Space size="middle">
+              {/* <Button type="primary" disabled={record.urlDownload} onClick={() => {setModalUploadPP(true); setProjectChoose({key: record.key, codeProject: record.codeProject})}} >Upload Project Plan</Button> */}
+              <Tooltip title="Upload Project Plan">
+                <Button type="primary" shape="circle" icon={<UploadOutlined />} disabled={record.urlDownload} onClick={() => {setModalUploadPP(true); setProjectChoose({key: record.key, codeProject: record.codeProject})}} />
+              </Tooltip>
+            </Space>
+          ),
+        },  
+      ]
     },
     ]
 
@@ -93,7 +144,7 @@ export default function DashboardPM() {
         }, () => {
             uploadTask.snapshot.ref.getDownloadURL().then(url =>{
                 database.projects.doc(projectChoose.key).update({
-                    projectStatus: "Waiting for Review",
+                    statusProjectPlan: "Waiting for Review",
                     urlDownload: url
                 })
                 message.success("Success Upload File")
@@ -112,7 +163,11 @@ export default function DashboardPM() {
     
     return(
     <>
-    <Table columns={columns} dataSource={dataProject} size="middle"/>
+    <Table 
+      columns={columns} 
+      dataSource={dataProject} 
+      size="middle"
+      scroll={{ x: 1600, y: 400 }}/>
     <Modal 
       title="Project Plan" 
       visible={modalUploadPP}

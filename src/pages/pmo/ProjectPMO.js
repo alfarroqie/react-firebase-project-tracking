@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import { Table, Button, Space, Form, Input, Select, Modal, DatePicker, message, Tooltip } from 'antd';
+import { Table, Button, Space, Form, Input, Select, Modal, DatePicker, message, Tooltip, Tag } from 'antd';
 import { CheckCircleOutlined, CloseCircleOutlined, BellOutlined } from '@ant-design/icons';
 
 import { database, storage } from '../../authConfig/firebase';
@@ -40,68 +40,124 @@ export default function DashboardPMO() {
 
     //Columns for table
     const columns = [
-    {
-      title: 'Code Project',
-      dataIndex: 'codeProject',
-    },
-    {
-      title: 'Project Name',
-      dataIndex: 'name',
-    },
-    {
-      title: 'Customer',
-      dataIndex: 'customer',
-    },
-    {
-      title: 'Contract Number',
-      dataIndex: 'contractNumber',
-    },
-    {
-      title: 'Start Date',
-      dataIndex: 'startDate',
-    },
-    {
-      title: 'End Date',
-      dataIndex: 'endDate',
-    },
-    {
-      title: 'Project Manager',
-      dataIndex: 'projectManager',
-    },
-    {
-      title: 'Project Status',
-      dataIndex: 'projectStatus',
-    },
+    // {
+    //   title: 'Project',
+    //   children: [
+        {
+          title: 'Code Project',
+          dataIndex: 'codeProject',
+          fixed:'left'
+        },
+        {
+          title: 'Project Name',
+          dataIndex: 'name',
+          fixed:'left'
+        },
+        {
+          title: 'Customer',
+          dataIndex: 'customer',
+        },
+        {
+          title: 'Contract Number',
+          dataIndex: 'contractNumber',
+        },
+        {
+          title: 'Start Date',
+          dataIndex: 'startDate',
+        },
+        {
+          title: 'End Date',
+          dataIndex: 'endDate',
+        },
+        {
+          title: 'Project Manager',
+          dataIndex: 'projectManager',
+        },
+        {
+          title: 'Project Status',
+          dataIndex: 'projectStatus',
+          render: tags => (
+            <>
+              {new Array(tags).map(tag => {
+                let color
+                if (tag === 'In Progress') {
+                  color = '';
+                } else if (tag === 'Not Started') {
+                  color = 'red'
+                }
+                return (
+                  <Tag color={color} key={tag}>
+                    {tag}
+                  </Tag>
+                );
+              })}
+            </>
+          ),
+        },
+    //   ]
+    // },  
     {
       title: 'Project Plan',
-      dataIndex: 'urlDownload',
-      render: (text, record) => (
-        <a href={record.urlDownload}>Download</a>
-    ),
-    },
-    {
-      title: 'Comment',
-      dataIndex: 'comment',
-    },
-    {
-      title: 'Actions',
-      dataIndex: 'id',
-      render: (text, record) => (
-        <Space size="middle">
-          <Tooltip title="Approve">
-            <Button type="primary" shape="circle" icon={<CheckCircleOutlined />} disabled={!record.urlDownload || record.projectStatus !== "Waiting for Review"} onClick={() => {setModalApprove(true); setProjectChoose({key:record.key})}} />
-          </Tooltip>
-          <Tooltip title="Reject">
-            <Button type="danger" shape="circle" icon={<CloseCircleOutlined />} disabled={!record.urlDownload || record.projectStatus !== "Waiting for Review"} onClick={() => {setModalReject(true); setProjectChoose({key:record.key})}} />
-          </Tooltip>
-          <Tooltip title="Review">
-            <Button type="secondary" shape="circle" icon={<BellOutlined />} disabled={!record.urlDownload || record.projectStatus !== "Waiting for Review"} onClick={() => {setModalReview(true); setProjectChoose({codeProject:record.codeProject, customer:record.customer, contractNumber: record.contractNumber, pm:record.projectManager})}} />
-          </Tooltip>
-          {/* <Button disabled={!record.urlDownload || record.projectStatus !== "Waiting for Review"} onClick={() => {setModalApprove(true); setProjectChoose({key:record.key})}} type="primary">Approve</Button> */}
-          {/* <Button disabled={!record.urlDownload || record.projectStatus !== "Waiting for Review"} onClick={() => {setModalReject(true); setProjectChoose({key:record.key})}} type="danger" >Reject</Button> */}
-          {/* <Button disabled={!record.urlDownload || record.projectStatus !== "Waiting for Review"} onClick={() => {setModalReview(true); setProjectChoose({codeProject:record.codeProject, customer:record.customer, contractNumber: record.contractNumber, pm:record.projectManager})}} type="secondary" >Review</Button> */}
-        </Space>
-      ),
+      children: [
+        {
+          title: 'Status',
+          dataIndex: 'statusProjectPlan',
+          // fixed:'right',
+          render: tags => (
+            <>
+              {new Array(tags).map(tag => {
+                let color
+                if (tag === 'Waiting for Submit') {
+                  color = 'red';
+                } else if (tag === 'Waiting for Review') {
+                  // color = ''
+                } else if (tag === 'Approved') {
+                  color = 'blue'
+                }
+                return (
+                  <Tag color={color} key={tag}>
+                    {tag}
+                  </Tag>
+                );
+              })}
+            </>
+          ),
+        },
+        {
+          title: 'Comment',
+          dataIndex: 'comment',
+          // fixed:'right',
+        },
+        {
+          title: 'File',
+          dataIndex: 'urlDownload',
+          // fixed:'right',
+          render: (text, record) => (
+            <a href={record.urlDownload}>Download</a>
+        ),
+        },
+        {
+          title: 'Actions',
+          dataIndex: 'id',
+          // fixed:'right',
+          render: (text, record) => (
+            <Space size="middle">
+              <Tooltip title="Approve">
+                <Button type="primary" color='green' shape="circle" icon={<CheckCircleOutlined />} disabled={!record.urlDownload || record.statusProjectPlan !== "Waiting for Review"} onClick={() => {setModalApprove(true); setProjectChoose({key:record.key})}} />
+              </Tooltip>
+              <Tooltip title="Reject">
+                <Button type="danger" shape="circle" icon={<CloseCircleOutlined />} disabled={!record.urlDownload || record.statusProjectPlan !== "Waiting for Review"} onClick={() => {setModalReject(true); setProjectChoose({key:record.key})}} />
+              </Tooltip>
+              <Tooltip title="Review">
+                <Button type="secondary" shape="circle" icon={<BellOutlined />} disabled={!record.urlDownload || record.statusProjectPlan !== "Waiting for Review"} onClick={() => {setModalReview(true); setProjectChoose({codeProject:record.codeProject, customer:record.customer, contractNumber: record.contractNumber, pm:record.projectManager})}} />
+              </Tooltip>
+              {/* <Button disabled={!record.urlDownload || record.projectStatus !== "Waiting for Review"} onClick={() => {setModalApprove(true); setProjectChoose({key:record.key})}} type="primary">Approve</Button> */}
+              {/* <Button disabled={!record.urlDownload || record.projectStatus !== "Waiting for Review"} onClick={() => {setModalReject(true); setProjectChoose({key:record.key})}} type="danger" >Reject</Button> */}
+              {/* <Button disabled={!record.urlDownload || record.projectStatus !== "Waiting for Review"} onClick={() => {setModalReview(true); setProjectChoose({codeProject:record.codeProject, customer:record.customer, contractNumber: record.contractNumber, pm:record.projectManager})}} type="secondary" >Review</Button> */}
+            </Space>
+          ),
+        },
+      ]
     },
     ]
 
@@ -125,7 +181,8 @@ export default function DashboardPMO() {
             "startDate": values['startDate'].format('DD-MM-YYYY'),
             "endDate": values['endDate'].format('DD-MM-YYYY'),
             "projectManager": values.pm,
-            "projectStatus": "Waiting for Submit Project Plan"
+            "projectStatus": "Not Started",
+            "statusProjectPlan": "Waiting for Submit"
         })
         const dataEmail = {
             to_email: values.pm,
@@ -153,10 +210,10 @@ export default function DashboardPMO() {
       setModalCreate(false)
     }
     function submitApprove(values){
-      // console.log(values)
       try{
         database.projects.doc(projectChoose.key).update({
           projectStatus: "In Progress",
+          statusProjectPlan: "Approved",
           comment: values.comment
         })
         message.success(`Success Approve Project Plan!`)
@@ -175,7 +232,7 @@ export default function DashboardPMO() {
         })
         database.projects.doc(projectChoose.key).update({
           comment: values.comment,
-          projectStatus: "Waiting for Submit Project Plan",
+          statusProjectPlan: "Waiting for Submit",
           urlDownload: null
         })
         message.success(`Success Reject Project Plan!`)
@@ -216,9 +273,16 @@ export default function DashboardPMO() {
 
     return(
     <>
-        <Button onClick={() => setModalCreate(true)} type="primary" shape="round">New Project</Button>
+        {/* <Button onClick={() => setModalCreate(true)} type="primary" shape="round">New Project</Button> */}
       {/* <Button type="primary"><Link to="/pmo/project"> Create Project </Link></Button> */}
-      <Table columns={columns} dataSource={dataProject} size="middle"/>
+      <Table 
+        columns={columns}
+        dataSource={dataProject}
+        size="small" 
+        bordered 
+        title={() => <Button onClick={() => setModalCreate(true)} type="primary" shape="round">New Project</Button>}
+        scroll={{ x: 1600, y: 400 }}
+      />
       <Modal 
       title="Create New Project" 
       visible={modalCreate}
