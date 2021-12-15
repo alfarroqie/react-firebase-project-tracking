@@ -12,13 +12,9 @@ export function AuthProvider({ children }) {
   // const [currentUserData, setCurrentUserData] = useState()
   const [loading, setLoading] = useState(true)
 
-  function signup(email, password, name, role) {
+  function signup(email, password, name, pmoRole) {
     return auth.createUserWithEmailAndPassword(email, password)
     .then(() => {
-      var pmoRole = false
-      if (role === "pmo"){
-        pmoRole = true
-      }
       database.users.doc(auth.currentUser.uid).set({
         name: name,
         email: email,

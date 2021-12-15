@@ -37,10 +37,10 @@ export default function DashboardPMO() {
     async function onFinish(values){
       const passDefeault = "123456"
       try {
-        await signup(values.email, passDefeault, values.name, "pm")
-        // navigate("/")
+        await signup(values.email, passDefeault, values.name, false)
         message.success("Success Add PM")
-      } catch {
+      } catch(err) {
+        message.error("Failed add PM")
       }
       form.resetFields()
       setModalAddPM(false)

@@ -44,30 +44,30 @@ export default function DashboardPMO() {
     //   title: 'Project',
     //   children: [
         {
-          title: 'Code Project',
-          dataIndex: 'codeProject',
+          title: 'Project Code',
+          dataIndex: 'projectCode',
           fixed:'left'
         },
         {
           title: 'Project Name',
-          dataIndex: 'name',
+          dataIndex: 'projectName',
           fixed:'left'
-        },
-        {
-          title: 'Customer',
-          dataIndex: 'customer',
         },
         {
           title: 'Contract Number',
           dataIndex: 'contractNumber',
         },
         {
-          title: 'Start Date',
-          dataIndex: 'startDate',
+          title: 'Customer',
+          dataIndex: 'customer',
         },
         {
-          title: 'End Date',
-          dataIndex: 'endDate',
+          title: 'Project Start',
+          dataIndex: 'projectStart',
+        },
+        {
+          title: 'Project End',
+          dataIndex: 'projectEnd',
         },
         {
           title: 'Project Manager',
@@ -101,7 +101,7 @@ export default function DashboardPMO() {
       children: [
         {
           title: 'Status',
-          dataIndex: 'statusProjectPlan',
+          dataIndex: 'projectPlanStatus',
           // fixed:'right',
           render: tags => (
             <>
@@ -125,35 +125,29 @@ export default function DashboardPMO() {
         },
         {
           title: 'Comment',
-          dataIndex: 'comment',
-          // fixed:'right',
+          dataIndex: 'projectPlanComment',
         },
         {
           title: 'File',
-          dataIndex: 'urlDownload',
-          // fixed:'right',
+          dataIndex: 'projectPlanFile',
           render: (text, record) => (
-            <a href={record.urlDownload}>Download</a>
+            <a href={record.projectPlanFile}>Download</a>
         ),
         },
         {
           title: 'Actions',
           dataIndex: 'id',
-          // fixed:'right',
           render: (text, record) => (
             <Space size="middle">
               <Tooltip title="Approve">
-                <Button type="primary" color='green' shape="circle" icon={<CheckCircleOutlined />} disabled={!record.urlDownload || record.statusProjectPlan !== "Waiting for Review"} onClick={() => {setModalApprove(true); setProjectChoose({key:record.key})}} />
+                <Button type="primary" shape="circle" icon={<CheckCircleOutlined />} disabled={!record.projectPlanFile || record.projectPlanStatus !== "Waiting for Review"} onClick={() => {setModalApprove(true); setProjectChoose({key:record.key, projectCode:record.projectCode,  projectName: record.projectName, contractNumber: record.contractNumber, customer:record.customer, pm:record.projectManager, projectPlanComment: record.projectPlanComment})}} />
               </Tooltip>
               <Tooltip title="Reject">
-                <Button type="danger" shape="circle" icon={<CloseCircleOutlined />} disabled={!record.urlDownload || record.statusProjectPlan !== "Waiting for Review"} onClick={() => {setModalReject(true); setProjectChoose({key:record.key})}} />
+                <Button type="danger" shape="circle" icon={<CloseCircleOutlined />} disabled={!record.projectPlanFile || record.projectPlanStatus !== "Waiting for Review"} onClick={() => {setModalReject(true); setProjectChoose({key:record.key, projectCode:record.projectCode,  projectName: record.projectName, contractNumber: record.contractNumber, customer:record.customer, pm:record.projectManager, projectPlanComment: record.projectPlanComment})}} />
               </Tooltip>
               <Tooltip title="Review">
-                <Button type="secondary" shape="circle" icon={<BellOutlined />} disabled={!record.urlDownload || record.statusProjectPlan !== "Waiting for Review"} onClick={() => {setModalReview(true); setProjectChoose({codeProject:record.codeProject, customer:record.customer, contractNumber: record.contractNumber, pm:record.projectManager})}} />
+                <Button type="secondary" shape="circle" icon={<BellOutlined />} disabled={!record.projectPlanFile || record.projectPlanStatus !== "Waiting for Review"} onClick={() => {setModalReview(true); setProjectChoose({projectCode:record.projectCode,  projectName: record.projectName, contractNumber: record.contractNumber, customer:record.customer, pm:record.projectManager})}} />
               </Tooltip>
-              {/* <Button disabled={!record.urlDownload || record.projectStatus !== "Waiting for Review"} onClick={() => {setModalApprove(true); setProjectChoose({key:record.key})}} type="primary">Approve</Button> */}
-              {/* <Button disabled={!record.urlDownload || record.projectStatus !== "Waiting for Review"} onClick={() => {setModalReject(true); setProjectChoose({key:record.key})}} type="danger" >Reject</Button> */}
-              {/* <Button disabled={!record.urlDownload || record.projectStatus !== "Waiting for Review"} onClick={() => {setModalReview(true); setProjectChoose({codeProject:record.codeProject, customer:record.customer, contractNumber: record.contractNumber, pm:record.projectManager})}} type="secondary" >Review</Button> */}
             </Space>
           ),
         },
@@ -161,7 +155,10 @@ export default function DashboardPMO() {
     },
     ]
 
-    const [form] = Form.useForm();
+    const [formCreate] = Form.useForm();
+    const [formApprove] = Form.useForm();
+    const [formReject] = Form.useForm();
+    const [formReview] = Form.useForm();
     const configDate = {
       rules: [
         {
@@ -174,24 +171,25 @@ export default function DashboardPMO() {
     function submitCreate(values){
       try{
         database.projects.add({
-            "codeProject": values.codeProject,
-            "name": values.name,
-            "customer": values.customer,
-            "contractNumber": values.contractNumber,
-            "startDate": values['startDate'].format('DD-MM-YYYY'),
-            "endDate": values['endDate'].format('DD-MM-YYYY'),
-            "projectManager": values.pm,
-            "projectStatus": "Not Started",
-            "statusProjectPlan": "Waiting for Submit"
+          "projectCode": values.projectCode,
+          "projectName": values.projectName,
+          "contractNumber": values.contractNumber,
+          "customer": values.customer,
+          "projectStart": values['projectStart'].format('DD-MM-YYYY'),
+          "projectEnd": values['projectEnd'].format('DD-MM-YYYY'),
+          "projectManager": values.projectManager,
+          "projectPlanStatus": "Waiting for Submit",
+          "projectStatus": "Not Started",
+
         })
         const dataEmail = {
-            to_email: values.pm,
-            message: `Code Project: ${values.codeProject} <br>
-                      Project Name: ${values.name} <br>
+            to_email: values.projectManager,
+            message: `Project Code: ${values.projectCode} <br>
+                      Project Name: ${values.projectName} <br>
+                      Contract Number: ${values.contractNumber} <br>
                       Customer: ${values.customer}<br>
-                      Contract Number: ${values.contractNumber}<br>
-                      Start Date: ${values['startDate'].format('DD-MM-YYYY')}<br>
-                      End Date: ${values['endDate'].format('DD-MM-YYYY')}<br>
+                      Project Start: ${values['projectStart'].format('DD-MM-YYYY')}<br>
+                      Project End: ${values['projectEnd'].format('DD-MM-YYYY')}<br>
                       `
         }
         emailjs.send('notif-app', 'newproject', dataEmail, 'user_jG4QPq3HFQpprBfuLL0ej')
@@ -206,21 +204,42 @@ export default function DashboardPMO() {
       } catch(err){
         message.error("Failed Add New Project")
       }
-      form.resetFields()
+      formCreate.resetFields()
       setModalCreate(false)
     }
     function submitApprove(values){
       try{
+        const dataEmail = {
+          to_email: projectChoose.pm,
+          project: `Project Code: ${projectChoose.projectCode} <br>
+                    Project Name: ${projectChoose.projectName} <br>
+                    Contract Number: ${projectChoose.contractNumber}<br>
+                    Customer: ${projectChoose.customer}<br>
+                    `,
+          message: `Congratulation!<br>
+                    This Project Plan has been Approved.<br>
+                    Comment for Project Plan: ${values.projectPlanComment}<br><br>
+                    Please check the application to update progress of project <br>
+                    `
+        }
+        emailjs.send('notif-app', 'projectPlan', dataEmail, 'user_jG4QPq3HFQpprBfuLL0ej')
+          .then(function(response) {
+            console.log('SUCCESS!', response.status, response.text);
+            message.success(`Success send approved email!`)
+          }, function(error) {
+            console.log('FAILED...', error);
+            message.error(`Failed send approved email!`)
+        });
         database.projects.doc(projectChoose.key).update({
           projectStatus: "In Progress",
-          statusProjectPlan: "Approved",
-          comment: values.comment
+          projectPlanStatus: "Approved",
+          projectPlanComment: values.projectPlanComment
         })
         message.success(`Success Approve Project Plan!`)
       } catch(err){
         console.log(err)
       }
-      form.resetFields()
+      formApprove.resetFields()
       setModalApprove(false)
     }
     function submitReject(values){
@@ -231,50 +250,71 @@ export default function DashboardPMO() {
           })
         })
         database.projects.doc(projectChoose.key).update({
-          comment: values.comment,
-          statusProjectPlan: "Waiting for Submit",
-          urlDownload: null
+          projectPlanComment: values.projectPlanComment,
+          projectPlanStatus: "Waiting for Submit",
+          projectPlanFile: null
         })
+        const dataEmail = {
+          to_email: projectChoose.pm,
+          project: `Project Code: ${projectChoose.projectCode} <br>
+                    Project Name: ${projectChoose.projectName} <br>
+                    Contract Number: ${projectChoose.contractNumber}<br>
+                    Customer: ${projectChoose.customer}<br>
+                    `,
+          message: `We're Sorry!<br>
+                    This Project Plan has been Rejected.<br>
+                    Comment for Project Plan: ${values.projectPlanComment}<br><br>
+                    Please check the application to re-submit the project plan <br>
+                    `
+        }
+        emailjs.send('notif-app', 'projectPlan', dataEmail, 'user_jG4QPq3HFQpprBfuLL0ej')
+          .then(function(response) {
+            console.log('SUCCESS!', response.status, response.text);
+            message.success(`Success send reject email!`)
+          }, function(error) {
+            console.log('FAILED...', error);
+            message.error(`Failed send reject email!`)
+        });
         message.success(`Success Reject Project Plan!`)
       } catch(err){
         console.log(err)
         message.error(`Failed Reject Project Plan!`)
       }
-      form.resetFields()
+      formReject.resetFields()
       setModalReject(false)
     }
     function submitReview(values){
       try{
         const dataEmail = {
           to_email: projectChoose.pm,
-          message1: `Code Project: ${projectChoose.codeProject} <br>
-                    Customer: ${projectChoose.customer}<br>
+          project: `Project Code: ${projectChoose.projectCode} <br>
+                    Project Name: ${projectChoose.projectName} <br>
                     Contract Number: ${projectChoose.contractNumber}<br>
+                    Customer: ${projectChoose.customer}<br>
                     `,
-          message2: `Meeting Name: ${values.meetingName}<br>
+          message: `This Project Plan need to meeting review. Please attend the meeting: <br>
+                     Meeting Name: ${values.meetingName}<br>
                      Meeting Schedule: ${values.meetingSchedule}<br>
                      Meeting Room: ${values.meetingRoom}<br>`
-      }
-      emailjs.send('notif-app', 'review_pp', dataEmail, 'user_jG4QPq3HFQpprBfuLL0ej')
-        .then(function(response) {
-          console.log('SUCCESS!', response.status, response.text);
-          message.success(`Success send review email!`)
-        }, function(error) {
-          console.log('FAILED...', error);
-          message.error(`Failed send review email!`)
-      });
+        }
+        emailjs.send('notif-app', 'projectPlan', dataEmail, 'user_jG4QPq3HFQpprBfuLL0ej')
+          .then(function(response) {
+            console.log('SUCCESS!', response.status, response.text);
+            message.success(`Success send review email!`)
+          }, function(error) {
+            console.log('FAILED...', error);
+            message.error(`Failed send review email!`)
+        });
       } catch(err) {
         console.log(err)
         message.error(`Failed send review email!`)
       }
-      form.resetFields()
+      formReview.resetFields()
       setModalReview(false)
     }
 
     return(
     <>
-        {/* <Button onClick={() => setModalCreate(true)} type="primary" shape="round">New Project</Button> */}
-      {/* <Button type="primary"><Link to="/pmo/project"> Create Project </Link></Button> */}
       <Table 
         columns={columns}
         dataSource={dataProject}
@@ -290,19 +330,19 @@ export default function DashboardPMO() {
       onCancel={() => {setModalCreate(false);}}
       >
         <Form
-          form={form}
+          form={formCreate}
           labelCol={{ span: 7 }}
           wrapperCol={{ span: 24 }}
           onFinish={submitCreate}
           autoComplete="off"
         >
           <Form.Item
-            label="Code Project"
-            name="codeProject"
+            label="Project Code"
+            name="projectCode"
             rules={[
             {
               required: true,
-              message: 'Please input code project!',
+              message: 'Please input project code!',
             },
             ]}
           >
@@ -310,23 +350,11 @@ export default function DashboardPMO() {
           </Form.Item>
           <Form.Item
             label="Project Name"
-            name="name"
+            name="projectName"
             rules={[
             {
               required: true,
               message: 'Please input project name!',
-            },
-            ]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            label="Customer"
-            name="customer"
-            rules={[
-            {
-              required: true,
-              message: 'Please input customer!',
             },
             ]}
           >
@@ -344,19 +372,31 @@ export default function DashboardPMO() {
           >
             <Input />
           </Form.Item>
-          <Form.Item name="startDate" label="Start Date" {...configDate}>
-              <DatePicker />
-          </Form.Item>
-          <Form.Item name="endDate" label="End Date" {...configDate}>
-              <DatePicker />
-          </Form.Item>
           <Form.Item
-            label="Select PM"
-            name="pm"
+            label="Customer"
+            name="customer"
             rules={[
             {
               required: true,
-              message: 'Please select PM',
+              message: 'Please input customer!',
+            },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item name="projectStart" label="Project Start" {...configDate}>
+              <DatePicker />
+          </Form.Item>
+          <Form.Item name="projectEnd" label="projectEnd" {...configDate}>
+              <DatePicker />
+          </Form.Item>
+          <Form.Item
+            label="Project Manager"
+            name="projectManager"
+            rules={[
+            {
+              required: true,
+              message: 'Please select Project Manager',
             },
             ]}
           >
@@ -382,14 +422,14 @@ export default function DashboardPMO() {
       onCancel={() => {setModalApprove(false); setProjectChoose()}}
       >
         <Form
-          form={form}
+          form={formApprove}
             layout="vertical"
             onFinish={submitApprove}
             autoComplete="off"
         >
             <Form.Item
                 label="Comment"
-                name="comment"
+                name="projectPlanComment"
                 rules={[
                 {
                     required: true,
@@ -413,14 +453,14 @@ export default function DashboardPMO() {
       onCancel={() => {setModalReject(false); setProjectChoose()}}
       >
         <Form
-          form={form}
+          form={formReject}
             layout="vertical"
             onFinish={submitReject}
             autoComplete="off"
         >
             <Form.Item
                 label="Comment"
-                name="comment"
+                name="projectPlanComment"
                 rules={[
                 {
                     required: true,
@@ -444,7 +484,7 @@ export default function DashboardPMO() {
       onCancel={() => {setModalReview(false);setProjectChoose()}}
       >
         <Form
-          form={form}
+          form={formReview}
             layout="vertical"
             onFinish={submitReview}
             autoComplete="off"

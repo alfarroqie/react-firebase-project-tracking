@@ -29,30 +29,30 @@ export default function DashboardPM() {
     //Columns for table
     const columns = [
     {
-      title: 'Code Project',
-      dataIndex: 'codeProject',
+      title: 'Project Code',
+      dataIndex: 'projectCode',
       fixed:'left'
     },
     {
       title: 'Project Name',
-      dataIndex: 'name',
+      dataIndex: 'projectName',
       fixed:'left'
-    },
-    {
-      title: 'Customer',
-      dataIndex: 'customer',
     },
     {
       title: 'Contract Number',
       dataIndex: 'contractNumber',
     },
     {
-      title: 'Start Date',
-      dataIndex: 'startDate',
+      title: 'Customer',
+      dataIndex: 'customer',
     },
     {
-      title: 'End Date',
-      dataIndex: 'endDate',
+      title: 'Project Start',
+      dataIndex: 'projectStart',
+    },
+    {
+      title: 'Project End',
+      dataIndex: 'projectEnd',
     },
     {
       title: 'Project Manager',
@@ -84,7 +84,7 @@ export default function DashboardPM() {
       children:[
         {
           title: 'Status',
-          dataIndex: 'statusProjectPlan',
+          dataIndex: 'projectPlanStatus',
           render: tags => (
             <>
               {new Array(tags).map(tag => {
@@ -107,13 +107,13 @@ export default function DashboardPM() {
         },
         {
           title: 'Comment',
-          dataIndex: 'comment',
+          dataIndex: 'projectPlanComment',
         },
         {
           title: 'File',
-          dataIndex: 'urlDownload',
+          dataIndex: 'projectPlanFile',
           render: (text, record) => (
-              <a href={record.urlDownload}>Download</a>
+              <a href={record.projectPlanFile}>Download</a>
           ),
         },
         {
@@ -121,9 +121,8 @@ export default function DashboardPM() {
           dataIndex: 'key',
           render: (text, record) => (
             <Space size="middle">
-              {/* <Button type="primary" disabled={record.urlDownload} onClick={() => {setModalUploadPP(true); setProjectChoose({key: record.key, codeProject: record.codeProject})}} >Upload Project Plan</Button> */}
               <Tooltip title="Upload Project Plan">
-                <Button type="primary" shape="circle" icon={<UploadOutlined />} disabled={record.urlDownload} onClick={() => {setModalUploadPP(true); setProjectChoose({key: record.key, codeProject: record.codeProject})}} />
+                <Button type="primary" shape="circle" icon={<UploadOutlined />} disabled={record.projectPlanFile} onClick={() => {setModalUploadPP(true); setProjectChoose({key: record.key, projectCode: record.projectCode})}} />
               </Tooltip>
             </Space>
           ),
@@ -136,7 +135,7 @@ export default function DashboardPM() {
     async function onFinish (values){
       setLoading(true)
       try{
-        const uploadTask = storage.ref(`/projectPlan/${projectChoose.key}/ProjectPlan-${projectChoose.codeProject}.${projectPlanFile.name.split(".")[1]}`).put(projectPlanFile)        
+        const uploadTask = storage.ref(`/projectPlan/${projectChoose.key}/ProjectPlan-${projectChoose.projectCode}.${projectPlanFile.name.split(".")[1]}`).put(projectPlanFile)        
         uploadTask.on('state-change', snapshot => {
 
         }, () => {
@@ -144,8 +143,8 @@ export default function DashboardPM() {
         }, () => {
             uploadTask.snapshot.ref.getDownloadURL().then(url =>{
                 database.projects.doc(projectChoose.key).update({
-                    statusProjectPlan: "Waiting for Review",
-                    urlDownload: url
+                    projectPlanStatus: "Waiting for Review",
+                    projectPlanFile: url
                 })
                 message.success("Success Upload File")
             })
