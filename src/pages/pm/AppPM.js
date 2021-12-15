@@ -1,10 +1,13 @@
 import React, {useState} from 'react';
 import { Layout, Menu, } from 'antd';
-import { DatabaseOutlined, LogoutOutlined } from '@ant-design/icons';
+import { DashboardOutlined, BarsOutlined, LogoutOutlined, MonitorOutlined } from '@ant-design/icons';
 import { Routes, Route, Link, Navigate, useNavigate} from 'react-router-dom';
 
 import { useAuth } from '../../authConfig/AuthContext';
+
 import DashboardPM from './DashboardPM';
+import ProjectPlanPM from './ProjectPlanPM';
+import ProjectTrackingPM from './ProjectTrackingPM'
 
 const { Content, Sider } = Layout;
 
@@ -44,7 +47,9 @@ function AppPMO() {
               onClick={(e) => setNavigateKey(e.key)}
               theme="dark"
             >
-              <Menu.Item key="PMDashboard" icon={<DatabaseOutlined />}><Link to='/pm'/>Project</Menu.Item>
+              <Menu.Item key="PMDashboard" icon={<DashboardOutlined />}><Link to='/pm'/>Dashboard</Menu.Item>
+              <Menu.Item key="PMProjectPlan" icon={<BarsOutlined />}><Link to='/pm/projectPlan'/>Project Plan</Menu.Item>
+              <Menu.Item key="PMProjectTracking" icon={<MonitorOutlined />}><Link to='/pm/projectTracking'/>Project Tracking</Menu.Item>
               <Menu.Item key="logoutPM" icon={<LogoutOutlined />} onClick={handleLogout}>Logout</Menu.Item>
             </Menu>
           </Sider>
@@ -59,6 +64,8 @@ function AppPMO() {
             >
               <Routes>
                 <Route exact path="/" element={<DashboardPM/>} />
+                <Route path="/projectPlan" element={<ProjectPlanPM/>} />
+                <Route path="/projectTracking" element={<ProjectTrackingPM/>} />
               </Routes>
             </Content>
           </Layout>

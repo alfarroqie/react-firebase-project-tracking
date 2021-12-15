@@ -1,10 +1,12 @@
 import React, {useState} from 'react';
 import { Layout, Menu, } from 'antd';
-import { DashboardOutlined, BarsOutlined, UserOutlined, LogoutOutlined } from '@ant-design/icons';
+import { DashboardOutlined, BarsOutlined, UserOutlined, LogoutOutlined, MonitorOutlined } from '@ant-design/icons';
 import { Routes, Route, Link, useNavigate, Navigate} from 'react-router-dom';
 
 import DashboardPMO from './DashboardPMO';
-import ProjectPMO from './ProjectPMO';
+import ProjectPlanPMO from './ProjectPlanPMO';
+import ProjectTrackingPMO from './ProjectTrackingPMO';
+
 import PM from "./PM"
 
 import { useAuth } from '../../authConfig/AuthContext';
@@ -48,7 +50,8 @@ function AppPMO() {
               theme="dark"
             >
               <Menu.Item key="dashboardPMO" icon={<DashboardOutlined />}><Link to='/pmo'/>Dashboard</Menu.Item>
-              <Menu.Item key="projectPMO" icon={<BarsOutlined />}><Link to='/pmo/project'/>Project</Menu.Item>
+              <Menu.Item key="projectPlanPMO" icon={<BarsOutlined />}><Link to='/pmo/projectPlan'/>Project Plan</Menu.Item>
+              <Menu.Item key="projectTrackingPMO" icon={<MonitorOutlined />}><Link to='/pmo/projectTracking'/>Project Tracking</Menu.Item>
               <Menu.Item key="pmPMO" icon={<UserOutlined />}><Link to='/pmo/PM'/>Project Manager</Menu.Item>
               <Menu.Item key="logoutPMO" icon={<LogoutOutlined />} onClick={handleLogout}>Logout</Menu.Item>
             </Menu>
@@ -64,7 +67,8 @@ function AppPMO() {
             >
               <Routes>
                 <Route exact path="/" element={<DashboardPMO/>}/>
-                <Route path="/project" element={<ProjectPMO/>} />
+                <Route path="/projectPlan" element={<ProjectPlanPMO/>} />
+                <Route path="/projectTracking" element={<ProjectTrackingPMO/>} />
                 <Route path="/PM" element={<PM/>} />
               </Routes>
             </Content>

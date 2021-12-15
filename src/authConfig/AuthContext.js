@@ -39,8 +39,8 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     let isSubscribed = true
+    setLoading(true)
     if (isSubscribed) {
-      setLoading(true)
       auth.onAuthStateChanged((user) => {
         if(user){
           database.users.doc(user.uid).get().then(doc => {
@@ -49,8 +49,8 @@ export function AuthProvider({ children }) {
         } else{
           setCurrentUser(user)
         }
-        setLoading(false)
       })
+      setLoading(false)
     }
     return () => isSubscribed = false
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
