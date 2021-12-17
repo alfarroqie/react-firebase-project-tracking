@@ -31,36 +31,44 @@ export default function DashboardPM() {
     {
       title: 'Project Code',
       dataIndex: 'projectCode',
+      width: '100px',
       fixed:'left'
     },
     {
       title: 'Project Name',
       dataIndex: 'projectName',
+      width: '100px',
       fixed:'left'
     },
     {
       title: 'Contract Number',
       dataIndex: 'contractNumber',
+      width: '100px',
     },
     {
       title: 'Customer',
       dataIndex: 'customer',
+      width: '100px',
     },
     {
       title: 'Project Start',
       dataIndex: 'projectStart',
+      width: '100px',
     },
     {
       title: 'Project End',
       dataIndex: 'projectEnd',
+      width: '100px',
     },
     {
       title: 'Project Manager',
       dataIndex: 'projectManager',
+      width: '100px',
     },
     {
       title: 'Project Status',
       dataIndex: 'projectStatus',
+      width: '100px',
       render: tags => (
         <>
           {new Array(tags).map(tag => {
@@ -85,6 +93,7 @@ export default function DashboardPM() {
         {
           title: 'Status',
           dataIndex: 'projectPlanStatus',
+          width: '100px',
           render: tags => (
             <>
               {new Array(tags).map(tag => {
@@ -108,17 +117,20 @@ export default function DashboardPM() {
         {
           title: 'Comment',
           dataIndex: 'projectPlanComment',
+          width: '100px',
         },
         {
           title: 'File',
           dataIndex: 'projectPlanFile',
+          width: '100px',
           render: (text, record) => (
               <a href={record.projectPlanFile}>Download</a>
           ),
         },
         {
           title: 'Actions',
-          dataIndex: 'key',
+          dataIndex: 'actions',
+          width: '70px',
           render: (text, record) => (
             <Space size="middle">
               <Tooltip title="Upload Project Plan">
@@ -165,8 +177,9 @@ export default function DashboardPM() {
     <Table 
       columns={columns} 
       dataSource={dataProject} 
-      size="middle"
-      scroll={{ x: 1600, y: 400 }}/>
+      size="small"
+      bordered
+      scroll={{y: 400 }}/>
     <Modal 
       title="Project Plan" 
       visible={modalUploadPP}

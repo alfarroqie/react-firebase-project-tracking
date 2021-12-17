@@ -46,36 +46,44 @@ export default function DashboardPMO() {
         {
           title: 'Project Code',
           dataIndex: 'projectCode',
+          width: '100px',
           fixed:'left'
         },
         {
           title: 'Project Name',
           dataIndex: 'projectName',
+          width: '100px',
           fixed:'left'
         },
         {
           title: 'Contract Number',
           dataIndex: 'contractNumber',
+          width: '100px',
         },
         {
           title: 'Customer',
           dataIndex: 'customer',
+          width: '100px',
         },
         {
           title: 'Project Start',
           dataIndex: 'projectStart',
+          width: '100px',
         },
         {
           title: 'Project End',
           dataIndex: 'projectEnd',
+          width: '100px',
         },
         {
           title: 'Project Manager',
           dataIndex: 'projectManager',
+          width: '100px',
         },
         {
           title: 'Project Status',
           dataIndex: 'projectStatus',
+          width: '100px',
           render: tags => (
             <>
               {new Array(tags).map(tag => {
@@ -102,6 +110,7 @@ export default function DashboardPMO() {
         {
           title: 'Status',
           dataIndex: 'projectPlanStatus',
+          width: '100px',
           // fixed:'right',
           render: tags => (
             <>
@@ -126,17 +135,20 @@ export default function DashboardPMO() {
         {
           title: 'Comment',
           dataIndex: 'projectPlanComment',
+          width: '100px',
         },
         {
           title: 'File',
           dataIndex: 'projectPlanFile',
+          width: '100px',
           render: (text, record) => (
             <a href={record.projectPlanFile}>Download</a>
         ),
         },
         {
           title: 'Actions',
-          dataIndex: 'id',
+          dataIndex: 'actions',
+          width: '150px',
           render: (text, record) => (
             <Space size="middle">
               <Tooltip title="Approve">
@@ -321,7 +333,7 @@ export default function DashboardPMO() {
         size="small" 
         bordered 
         title={() => <Button onClick={() => setModalCreate(true)} type="primary" shape="round">New Project</Button>}
-        scroll={{ x: 1600, y: 400 }}
+        scroll={{y: 400 }}
       />
       <Modal 
       title="Create New Project" 
