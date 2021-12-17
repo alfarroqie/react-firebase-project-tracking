@@ -84,23 +84,25 @@ export default function DashboardPMO() {
           title: 'Project Status',
           dataIndex: 'projectStatus',
           width: '100px',
-          render: tags => (
-            <>
-              {new Array(tags).map(tag => {
-                let color
-                if (tag === 'In Progress') {
-                  color = '';
-                } else if (tag === 'Not Started') {
-                  color = 'red'
-                }
-                return (
-                  <Tag color={color} key={tag}>
-                    {tag}
-                  </Tag>
-                );
-              })}
-            </>
-          ),
+          render: tag => {
+            let color
+            if (tag === 'Not Started') {
+              color = '';
+            } else if (tag === 'In Progress') {
+              color = 'blue'
+            } else if (tag === 'On Schedule-In Progress') {
+              color = 'blue'
+            } else if (tag === 'OnSchedule-Done') {
+              color = 'green'
+            } else if (tag === 'Over Schedule-In Progress') {
+              color = 'red'
+            } else if (tag === 'Over Schedule-Done') {
+              color = 'orange'
+            }
+            return (
+              <Tag color={color}>{tag}</Tag>
+            );
+          }
         },
     //   ]
     // },  
@@ -111,26 +113,21 @@ export default function DashboardPMO() {
           title: 'Status',
           dataIndex: 'projectPlanStatus',
           width: '100px',
-          // fixed:'right',
-          render: tags => (
-            <>
-              {new Array(tags).map(tag => {
-                let color
-                if (tag === 'Waiting for Submit') {
-                  color = 'red';
-                } else if (tag === 'Waiting for Review') {
-                  // color = ''
-                } else if (tag === 'Approved') {
-                  color = 'blue'
-                }
-                return (
-                  <Tag color={color} key={tag}>
-                    {tag}
-                  </Tag>
-                );
-              })}
-            </>
-          ),
+          render: tag => {
+            let color = ''
+            if(tag === 'Waiting for Submit') {
+              color = 'red';
+            } else if (tag === 'Waiting for Review') {
+              color = ''
+            } else if (tag === 'Approved') {
+              color = 'blue'
+            }
+            return (
+              <>
+                <Tag color={color}>{tag}</Tag>
+              </>
+            )
+          }
         },
         {
           title: 'Comment',
