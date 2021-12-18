@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Space, Button, Table, Tag, Tooltip, Form, Input, Select, DatePicker, Modal } from "antd";
+import { Space, Button, Table, Tag, Tooltip, Form, Input, InputNumber, Select, DatePicker, Modal, message } from "antd";
 import { EditOutlined } from '@ant-design/icons';
 
 import { database } from '../../authConfig/firebase';
+import moment from 'moment';
 
 export default function ProjectTrackingPMO(){
   const [dataProject, setDataProject] = useState()
-  // const [projectChoose, setProjectChoose]= useState()
+  const [projectChoose, setProjectChoose]= useState()
 
   const [modalUpdate, setModalUpdate] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -84,25 +85,49 @@ export default function ProjectTrackingPMO(){
     {
       title: 'Project Status',
       dataIndex: 'projectStatus',
-      width: '100px',
-      render: tag => {
+      width: '170px',
+      render: (tag, record) => {
         let color
-        if (tag === 'Not Started') {
-          color = '';
-        } else if (tag === 'In Progress') {
+        let status
+        if(record.projectPlanStatus !== 'Approved'){
+          color = ''
+          status = 'Not Started'
+        } else if (!record.projectProgress || !record.projectEndActual){
           color = 'blue'
-        } else if (tag === 'On Schedule-In Progress') {
+          status = 'In Progress'
+        } else if (record.projectProgress < 100 && moment(record.projectEndActual, 'YYYY-MM-DD') <= moment(record.projectEnd,'DD-MM-YYYY')){
           color = 'blue'
-        } else if (tag === 'OnSchedule-Done') {
+          status = 'On Schedule-In Progress'
+        } else if (record.projectProgress === 100 && moment(record.projectEndActual, 'YYYY-MM-DD') <= moment(record.projectEnd,'DD-MM-YYYY')){
           color = 'green'
-        } else if (tag === 'Over Schedule-In Progress') {
+          status = 'On Schedule-Done'
+        } else if (record.projectProgress < 100 && moment(record.projectEndActual, 'YYYY-MM-DD') > moment(record.projectEnd,'DD-MM-YYYY')){
           color = 'red'
-        } else if (tag === 'Over Schedule-Done') {
+          status = 'Over Schedule-In Progress'
+        } else if (record.projectProgress === 100 && moment(record.projectEndActual, 'YYYY-MM-DD') > moment(record.projectEnd,'DD-MM-YYYY')){
           color = 'orange'
+          status = 'Over Schedule-Done'
         }
-        return (
-          <Tag color={color}>{tag}</Tag>
-        );
+        return(
+          <Tag color={color}>{status}</Tag>
+        )
+        // let color
+        // if (tag === 'Not Started') {
+        //   color = '';
+        // } else if (tag === 'In Progress') {
+        //   color = 'blue'
+        // } else if (tag === 'On Schedule-In Progress') {
+        //   color = 'blue'
+        // } else if (tag === 'OnSchedule-Done') {
+        //   color = 'green'
+        // } else if (tag === 'Over Schedule-In Progress') {
+        //   color = 'red'
+        // } else if (tag === 'Over Schedule-Done') {
+        //   color = 'orange'
+        // }
+        // return (
+        //   <Tag color={color}>{tag}</Tag>
+        // );
       }
     },
     {
@@ -134,20 +159,37 @@ export default function ProjectTrackingPMO(){
       title: 'Resource Status',
       dataIndex: 'resourceStatus',
       width: '100px',
-      render: tag => {
-            let color
-            if (tag === 'Inadequate') {
-              color = 'red';
-            } else if (tag === 'Sufficient') {
-              color = 'green'
-            } else if (tag === 'Borderline') {
-              color = 'yellow'
-            } else if (tag === 'Overlimit') {
-              color = 'orange'
-            }
-            return (
-              <Tag color={color}>{tag}</Tag>
-            );
+      render: (tag, record) => {
+        let color
+        let status
+        if(!record.resourcePlan || !record.resourceActual){
+          status = ''
+          color = ''
+        } else if (record.resourceActual < record.resourcePlan){
+          status = 'Inadequate'
+          color = 'red'
+        } else if(record.resourceActual === record.resourcePlan) {
+          status = 'Sufficient'
+          color = 'green'
+        } else if ((record.resourceActual - record.resourcePlan) <= 3) {
+          status = 'Borderline'
+          color = 'yellow'
+        } else if ((record.resourceActual - record.resourcePlan) > 3) {
+          status = 'Overlimit'
+          color = 'orange'
+        }
+            // if (tag === 'Inadequate') {
+            //   color = 'red';
+            // } else if (tag === 'Sufficient') {
+            //   color = 'green'
+            // } else if (tag === 'Borderline') {
+            //   color = 'yellow'
+            // } else if (tag === 'Overlimit') {
+            //   color = 'orange'
+            // }
+        return (
+          <Tag color={color}>{status}</Tag>
+        );
       }
     },
     {
@@ -179,17 +221,44 @@ export default function ProjectTrackingPMO(){
       title: 'Risk',
       dataIndex: 'risk',
       width: '100px',
-      render: tag => {
+      render: (tag,record) => {
             let color
-            if (tag === 'Low Risk') {
-              color = 'green';
-            } else if (tag === 'Medium Risk') {
+            let status
+            if (!record.budget || !record.schedule) {
+              status = ''
+              color = ''
+            } else if (
+              (record.schedule === 'Behind Schedule' && record.budget === 'Under Budget') ||
+              (record.schedule === 'On Schedule' && record.budget === 'Under Budget') ||
+              (record.schedule === 'Behind Schedule' && record.budget === 'On Budget') ||
+              (record.schedule === 'On Schedule' && record.budget === 'On Budget')
+            ) {
+              status = 'Low Risk'
+              color = 'green'
+            } else if (
+              (record.schedule === 'Ahead Schedule' && record.budget === 'Under Budget') ||
+              (record.schedule === 'Ahead Schedule' && record.budget === 'On Budget')
+            ) {
+              status = 'Medium Risk'
               color = 'yellow'
-            } else if (tag === 'High Risk') {
+            } else if (
+              (record.schedule === 'Ahead Schedule' && record.budget === 'Over Budget') ||
+              (record.schedule === 'On Schedule' && record.budget === 'Over Budget') ||
+              (record.schedule === 'Behind Schedule' && record.budget === 'Over Budget')
+            ) {
+              status = 'High Risk'
               color = 'red'
             }
+
+            // if (tag === 'Low Risk') {
+            //   color = 'green';
+            // } else if (tag === 'Medium Risk') {
+            //   color = 'yellow'
+            // } else if (tag === 'High Risk') {
+            //   color = 'red'
+            // }
             return (
-              <Tag color={color}>{tag}</Tag>
+              <Tag color={color}>{status}</Tag>
             );
       }
     },
@@ -286,7 +355,28 @@ export default function ProjectTrackingPMO(){
       render: (text, record) => (
         <Space>
           <Tooltip title="Update">
-                <Button type="primary" shape="circle" icon={<EditOutlined />} onClick={() => {setModalUpdate(true); console.log(record) }} />
+                <Button type="primary" shape="circle" icon={<EditOutlined />} onClick={() => { 
+                  form.setFieldsValue({
+                    poNumber: record.poNumber,
+                    poYear: record.poYear,
+                    methodology: record.methodology,
+                    resourcePlan: record.resourcePlan,
+                    resourceActual: record.resourceActual,
+                    pmoRole: record.pmoRole,
+                    priority: record.priority,
+                    value: record.value,
+                    schedule: record.schedule,
+                    budget: record.budget,
+                    term1Deadline: record.term1Deadline ? moment(record.term1Deadline, 'YYYY-MM-DD'): null,
+                    term2Deadline: record.term2Deadline ? moment(record.term2Deadline, 'YYYY-MM-DD'): null,
+                    term3Deadline: record.term3Deadline ? moment(record.term3Deadline, 'YYYY-MM-DD'): null,
+                    term4Deadline: record.term4Deadline ? moment(record.term4Deadline, 'YYYY-MM-DD'): null,
+                    term5Deadline: record.term5Deadline ? moment(record.term5Deadline, 'YYYY-MM-DD'): null,
+                  })
+                  setProjectChoose(record.key)
+                  setModalUpdate(true)}
+                  } 
+                />
               </Tooltip>
         </Space>
       ),
@@ -296,13 +386,33 @@ export default function ProjectTrackingPMO(){
   const [form] = Form.useForm();
 
   function onFinish(values){
-    setLoading(true)
     try{
-      console.log(values)
+      setLoading(true)
+      database.projects.doc(projectChoose).update({
+        poNumber: values.poNumber ? values.poNumber : null,
+        poYear: values.poYear ? values.poYear : null,
+        methodology: values.methodology? values.methodology : null,
+        resourcePlan: values.resourcePlan ? values.resourcePlan : null,
+        resourceActual: values.resourceActual ? values.resourceActual : null,
+        pmoRole: values.pmoRole ? values.pmoRole : null,
+        priority: values.priority ? values.priority : null,
+        value: values.value ? values.value : null,
+        schedule: values.schedule ? values.schedule : null,
+        budget: values.budget ? values.budget : null,
+        term1Deadline: values.term1Deadline? values['term1Deadline'].format('YYYY-MM-DD') : null,
+        term2Deadline: values.term2Deadline? values['term2Deadline'].format('YYYY-MM-DD') : null,
+        term3Deadline: values.term3Deadline? values['term3Deadline'].format('YYYY-MM-DD') : null,
+        term4Deadline: values.term4Deadline? values['term4Deadline'].format('YYYY-MM-DD') : null,
+        term5Deadline: values.term5Deadline? values['term5Deadline'].format('YYYY-MM-DD') : null,
+      })
+      message.success("Success update data")
+      form.resetFields()
+      setLoading(false)
     } catch(err) {
       console.log(err)
+      message.error("Failed update data")
+      setLoading(false)
     }
-    setLoading(false)
   }
     return(
       <>
@@ -317,7 +427,11 @@ export default function ProjectTrackingPMO(){
           title="Update Project" 
           visible={modalUpdate}
           footer={null}
-          onCancel={() => setModalUpdate(false)}
+          onCancel={() => {
+            setProjectChoose(null)
+            setModalUpdate(false)
+            form.resetFields()
+          }}
         >
           <Form
             form={form}
@@ -342,17 +456,17 @@ export default function ProjectTrackingPMO(){
           </Form.Item>
           <Input.Group compact>
           <Form.Item name="resourcePlan" label="Resource Plan">
-            <Input/>
+            <InputNumber/>
           </Form.Item>
           <Form.Item name="resourceActual" label="Resource Actual">
-            <Input/>
+            <InputNumber/>
           </Form.Item>
           </Input.Group>
           <Form.Item name="pmoRole" label="PMO Role">
             <Select>
               <Select.Option key="supportive" value="Supportive">Supportive</Select.Option>
               <Select.Option key="controlling" value="Controlling">Controlling</Select.Option>
-              <Select.Option key="directive" value="Supportive">Directive</Select.Option>
+              <Select.Option key="directive" value="Directive">Directive</Select.Option>
             </Select>
           </Form.Item>
           <Form.Item name="priority" label="Priority">

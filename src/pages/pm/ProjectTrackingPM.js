@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { Space, Button, Table, Tag, Tooltip, Form, Modal, Slider, DatePicker, Select, Input } from "antd";
+import { Space, Button, Table, Tag, Tooltip, Form, Modal, Slider, DatePicker, Select, Input, message } from "antd";
 import { EditOutlined } from '@ant-design/icons';
 
 import {useAuth} from '../../authConfig/AuthContext'
 import { database } from '../../authConfig/firebase';
 
+import moment from 'moment';
+
 export default function ProjectTrackingPM(){
   
   const {currentUser} = useAuth()
   const [dataProject, setDataProject] = useState()
+  const [projectChoose, setProjectChoose] = useState()
 
   const [modalUpdate, setModalUpdate] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -86,25 +89,49 @@ export default function ProjectTrackingPM(){
     {
       title: 'Project Status',
       dataIndex: 'projectStatus',
-      width: '100px',
-      render: tag => {
+      width: '170px',
+      render: (tag, record) => {
         let color
-        if (tag === 'Not Started') {
-          color = '';
-        } else if (tag === 'In Progress') {
+        let status
+        if(record.projectPlanStatus !== 'Approved'){
+          color = ''
+          status = 'Not Started'
+        } else if (!record.projectProgress || !record.projectEndActual){
           color = 'blue'
-        } else if (tag === 'On Schedule-In Progress') {
+          status = 'In Progress'
+        } else if (record.projectProgress < 100 && moment(record.projectEndActual, 'YYYY-MM-DD') <= moment(record.projectEnd,'DD-MM-YYYY')){
           color = 'blue'
-        } else if (tag === 'OnSchedule-Done') {
+          status = 'On Schedule-In Progress'
+        } else if (record.projectProgress === 100 && moment(record.projectEndActual, 'YYYY-MM-DD') <= moment(record.projectEnd,'DD-MM-YYYY')){
           color = 'green'
-        } else if (tag === 'Over Schedule-In Progress') {
+          status = 'On Schedule-Done'
+        } else if (record.projectProgress < 100 && moment(record.projectEndActual, 'YYYY-MM-DD') > moment(record.projectEnd,'DD-MM-YYYY')){
           color = 'red'
-        } else if (tag === 'Over Schedule-Done') {
+          status = 'Over Schedule-In Progress'
+        } else if (record.projectProgress === 100 && moment(record.projectEndActual, 'YYYY-MM-DD') > moment(record.projectEnd,'DD-MM-YYYY')){
           color = 'orange'
+          status = 'Over Schedule-Done'
         }
-        return (
-          <Tag color={color}>{tag}</Tag>
-        );
+        return(
+          <Tag color={color}>{status}</Tag>
+        )
+        // let color
+        // if (tag === 'Not Started') {
+        //   color = '';
+        // } else if (tag === 'In Progress') {
+        //   color = 'blue'
+        // } else if (tag === 'On Schedule-In Progress') {
+        //   color = 'blue'
+        // } else if (tag === 'OnSchedule-Done') {
+        //   color = 'green'
+        // } else if (tag === 'Over Schedule-In Progress') {
+        //   color = 'red'
+        // } else if (tag === 'Over Schedule-Done') {
+        //   color = 'orange'
+        // }
+        // return (
+        //   <Tag color={color}>{tag}</Tag>
+        // );
       }
     },
     {
@@ -136,21 +163,38 @@ export default function ProjectTrackingPM(){
       title: 'Resource Status',
       dataIndex: 'resourceStatus',
       width: '100px',
-      render: tag => {
+      render: (tag, record) => {
         let color
-        if (tag === 'Inadequate') {
-          color = 'red';
-        } else if (tag === 'Sufficient') {
+        let status
+        if(!record.resourcePlan || !record.resourceActual){
+          status = ''
+          color = ''
+        } else if (record.resourceActual < record.resourcePlan){
+          status = 'Inadequate'
+          color = 'red'
+        } else if(record.resourceActual === record.resourcePlan) {
+          status = 'Sufficient'
           color = 'green'
-        } else if (tag === 'Borderline') {
+        } else if ((record.resourceActual - record.resourcePlan) <= 3) {
+          status = 'Borderline'
           color = 'yellow'
-        } else if (tag === 'Overlimit') {
+        } else if ((record.resourceActual - record.resourcePlan) > 3) {
+          status = 'Overlimit'
           color = 'orange'
         }
+            // if (tag === 'Inadequate') {
+            //   color = 'red';
+            // } else if (tag === 'Sufficient') {
+            //   color = 'green'
+            // } else if (tag === 'Borderline') {
+            //   color = 'yellow'
+            // } else if (tag === 'Overlimit') {
+            //   color = 'orange'
+            // }
         return (
-          <Tag color={color}>{tag}</Tag>
+          <Tag color={color}>{status}</Tag>
         );
-  }
+      }
     },
     {
       title: 'Term 1 Actual',
@@ -220,7 +264,27 @@ export default function ProjectTrackingPM(){
       render: (text, record) => (
         <Space>
           <Tooltip title="Update Progress">
-                <Button type="primary" shape="circle" icon={<EditOutlined />} onClick={() => {setModalUpdate(true)}} />
+                <Button type="primary" shape="circle" icon={<EditOutlined />} onClick={() => 
+                  {
+                    form.setFieldsValue({
+                      term1Actual: record.term1Actual? moment(record.term1Actual, 'YYYY-MM-DD'): null,
+                      term1Status: record.term1Status,
+                      term2Actual: record.term2Actual? moment(record.term2Actual, 'YYYY-MM-DD'): null,
+                      term2Status: record.term2Status,
+                      term3Actual: record.term3Actual? moment(record.term3Actual, 'YYYY-MM-DD'): null,
+                      term3Status: record.term3Status,
+                      term4Actual: record.term4Actual? moment(record.term4Actual, 'YYYY-MM-DD'): null,
+                      term4Status: record.term4Status,
+                      term5Actual: record.term5Actual? moment(record.term5Actual, 'YYYY-MM-DD'): null,
+                      term5Status: record.term5Status,
+                      projectEndActual: record.projectEndActual? moment(record.projectEndActual, 'YYYY-MM-DD'): null,
+                      projectProgress: record.projectProgress
+                    })
+                    setProjectChoose(record.key)
+                    setModalUpdate(true)
+                  }
+                  } 
+                />
               </Tooltip>
         </Space>
       ),
@@ -230,13 +294,30 @@ export default function ProjectTrackingPM(){
   const [form] = Form.useForm();
 
   function onFinish(values){
-    setLoading(true)
     try{
-      console.log(values)
+      setLoading(true)
+      database.projects.doc(projectChoose).update({
+        term1Actual: values.term1Actual? values['term1Actual'].format('YYYY-MM-DD') : null,
+        term1Status: values.term1Status? values.term1Status : null,
+        term2Actual: values.term2Actual? values['term2Actual'].format('YYYY-MM-DD') : null,
+        term2Status: values.term2Status? values.term2Status : null,
+        term3Actual: values.term3Actual? values['term3Actual'].format('YYYY-MM-DD') : null,
+        term3Status: values.term3Status? values.term3Status : null,
+        term4Actual: values.term4Actual? values['term4Actual'].format('YYYY-MM-DD') : null,
+        term4Status: values.term4Status? values.term4Status : null,
+        term5Actual: values.term5Actual? values['term5Actual'].format('YYYY-MM-DD') : null,
+        term5Status: values.term5Status? values.term5Status : null,
+        projectEndActual: values.projectEndActual? values['projectEndActual'].format('YYYY-MM-DD') : null,
+        projectProgress: values.projectProgress? values.projectProgress : null
+      })
+      message.success("Success update data")
+      form.resetFields()
+      setLoading(false)
     } catch(err) {
+      message.error("Failed update data")
       console.log(err)
+      setLoading(false)
     }
-    setLoading(false)
   }
 
     return(
@@ -252,7 +333,11 @@ export default function ProjectTrackingPM(){
           title="Update Progress" 
           visible={modalUpdate}
           footer={null}
-          onCancel={() => setModalUpdate(false)}
+          onCancel={() => {
+            setProjectChoose(null)
+            setModalUpdate(false)
+            form.resetFields()
+          }}
         >
           <Form
             form={form}

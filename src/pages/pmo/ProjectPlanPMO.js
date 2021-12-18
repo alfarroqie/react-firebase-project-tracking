@@ -4,6 +4,7 @@ import { CheckCircleOutlined, CloseCircleOutlined, BellOutlined } from '@ant-des
 
 import { database, storage } from '../../authConfig/firebase';
 import emailjs from 'emailjs-com'
+import moment from 'moment'
 
 export default function DashboardPMO() {
   const [dataProject, setDataProject] = useState()
@@ -83,25 +84,32 @@ export default function DashboardPMO() {
         {
           title: 'Project Status',
           dataIndex: 'projectStatus',
-          width: '100px',
-          render: tag => {
+          width: '170px',
+          render: (tag, record) => {
             let color
-            if (tag === 'Not Started') {
-              color = '';
-            } else if (tag === 'In Progress') {
+            let status
+            if(record.projectPlanStatus !== 'Approved'){
+              color = ''
+              status = 'Not Started'
+            } else if (!record.projectProgress || !record.projectEndActual){
               color = 'blue'
-            } else if (tag === 'On Schedule-In Progress') {
+              status = 'In Progress'
+            } else if (record.projectProgress < 100 && moment(record.projectEndActual, 'YYYY-MM-DD') <= moment(record.projectEnd,'DD-MM-YYYY')){
               color = 'blue'
-            } else if (tag === 'OnSchedule-Done') {
+              status = 'On Schedule-In Progress'
+            } else if (record.projectProgress === 100 && moment(record.projectEndActual, 'YYYY-MM-DD') <= moment(record.projectEnd,'DD-MM-YYYY')){
               color = 'green'
-            } else if (tag === 'Over Schedule-In Progress') {
+              status = 'On Schedule-Done'
+            } else if (record.projectProgress < 100 && moment(record.projectEndActual, 'YYYY-MM-DD') > moment(record.projectEnd,'DD-MM-YYYY')){
               color = 'red'
-            } else if (tag === 'Over Schedule-Done') {
+              status = 'Over Schedule-In Progress'
+            } else if (record.projectProgress === 100 && moment(record.projectEndActual, 'YYYY-MM-DD') > moment(record.projectEnd,'DD-MM-YYYY')){
               color = 'orange'
+              status = 'Over Schedule-Done'
             }
-            return (
-              <Tag color={color}>{tag}</Tag>
-            );
+            return(
+              <Tag color={color}>{status}</Tag>
+            )
           }
         },
     //   ]
@@ -112,7 +120,7 @@ export default function DashboardPMO() {
         {
           title: 'Status',
           dataIndex: 'projectPlanStatus',
-          width: '100px',
+          width: '130px',
           render: tag => {
             let color = ''
             if(tag === 'Waiting for Submit') {
@@ -188,8 +196,34 @@ export default function DashboardPMO() {
           "projectEnd": values['projectEnd'].format('DD-MM-YYYY'),
           "projectManager": values.projectManager,
           "projectPlanStatus": "Waiting for Submit",
-          "projectStatus": "Not Started",
-
+          "projectStatus": null,
+          "poNumber" : null,
+          "poYear" : null,
+          "methodology" : null,
+          "resourcePlan": null,
+          "resourceActual": null,
+          "pmoROle": null,
+          "priority": null,
+          "value": null,
+          "schedule": null,
+          "budget": null,
+          "term1Deadline": null,
+          "term1Actual": null,
+          "term1Status": null,
+          "term2Deadline": null,
+          'term2Actual': null,
+          "term2Status": null,
+          "term3Deadline": null,
+          "term3Actual": null,
+          "term3Status": null,
+          "term4Deadline": null,
+          "term4Actual": null,
+          "term4Status": null,
+          "term5Deadline": null,
+          "term5Actual": null,
+          "term5Status": null,
+          "projectEndActual": null,
+          "projectProgress": null,
         })
         const dataEmail = {
             to_email: values.projectManager,
@@ -396,7 +430,7 @@ export default function DashboardPMO() {
           <Form.Item name="projectStart" label="Project Start" {...configDate}>
               <DatePicker />
           </Form.Item>
-          <Form.Item name="projectEnd" label="projectEnd" {...configDate}>
+          <Form.Item name="projectEnd" label="Project End" {...configDate}>
               <DatePicker />
           </Form.Item>
           <Form.Item

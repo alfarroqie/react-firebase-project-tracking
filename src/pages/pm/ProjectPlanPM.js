@@ -4,6 +4,7 @@ import { UploadOutlined } from '@ant-design/icons';
 
 import { useAuth } from '../../authConfig/AuthContext';
 import { database, storage } from '../../authConfig/firebase';
+import moment from 'moment'
 
 export default function DashboardPM() {
   const {currentUser} = useAuth()
@@ -68,25 +69,32 @@ export default function DashboardPM() {
     {
       title: 'Project Status',
       dataIndex: 'projectStatus',
-      width: '100px',
-      render: tag => {
+      width: '170px',
+      render: (tag, record) => {
         let color
-        if (tag === 'Not Started') {
-          color = '';
-        } else if (tag === 'In Progress') {
+        let status
+        if(record.projectPlanStatus !== 'Approved'){
+          color = ''
+          status = 'Not Started'
+        } else if (!record.projectProgress || !record.projectEndActual){
           color = 'blue'
-        } else if (tag === 'On Schedule-In Progress') {
+          status = 'In Progress'
+        } else if (record.projectProgress < 100 && moment(record.projectEndActual, 'YYYY-MM-DD') <= moment(record.projectEnd,'DD-MM-YYYY')){
           color = 'blue'
-        } else if (tag === 'OnSchedule-Done') {
+          status = 'On Schedule-In Progress'
+        } else if (record.projectProgress === 100 && moment(record.projectEndActual, 'YYYY-MM-DD') <= moment(record.projectEnd,'DD-MM-YYYY')){
           color = 'green'
-        } else if (tag === 'Over Schedule-In Progress') {
+          status = 'On Schedule-Done'
+        } else if (record.projectProgress < 100 && moment(record.projectEndActual, 'YYYY-MM-DD') > moment(record.projectEnd,'DD-MM-YYYY')){
           color = 'red'
-        } else if (tag === 'Over Schedule-Done') {
+          status = 'Over Schedule-In Progress'
+        } else if (record.projectProgress === 100 && moment(record.projectEndActual, 'YYYY-MM-DD') > moment(record.projectEnd,'DD-MM-YYYY')){
           color = 'orange'
+          status = 'Over Schedule-Done'
         }
-        return (
-          <Tag color={color}>{tag}</Tag>
-        );
+        return(
+          <Tag color={color}>{status}</Tag>
+        )
       }
     },
     {
@@ -95,7 +103,7 @@ export default function DashboardPM() {
         {
           title: 'Status',
           dataIndex: 'projectPlanStatus',
-          width: '100px',
+          width: '130px',
           render: tag => {
             let color = ''
             if(tag === 'Waiting for Submit') {
