@@ -87,54 +87,6 @@ export default function ProjectTrackingPM(){
       }
     },
     {
-      title: 'Project Status',
-      dataIndex: 'projectStatus',
-      width: '170px',
-      render: (tag, record) => {
-        let color
-        let status
-        if(record.projectPlanStatus !== 'Approved'){
-          color = ''
-          status = 'Not Started'
-        } else if (!record.projectProgress || !record.projectEndActual){
-          color = 'blue'
-          status = 'In Progress'
-        } else if (record.projectProgress < 100 && moment(record.projectEndActual, 'YYYY-MM-DD') <= moment(record.projectEnd,'DD-MM-YYYY')){
-          color = 'blue'
-          status = 'On Schedule-In Progress'
-        } else if (record.projectProgress === 100 && moment(record.projectEndActual, 'YYYY-MM-DD') <= moment(record.projectEnd,'DD-MM-YYYY')){
-          color = 'green'
-          status = 'On Schedule-Done'
-        } else if (record.projectProgress < 100 && moment(record.projectEndActual, 'YYYY-MM-DD') > moment(record.projectEnd,'DD-MM-YYYY')){
-          color = 'red'
-          status = 'Over Schedule-In Progress'
-        } else if (record.projectProgress === 100 && moment(record.projectEndActual, 'YYYY-MM-DD') > moment(record.projectEnd,'DD-MM-YYYY')){
-          color = 'orange'
-          status = 'Over Schedule-Done'
-        }
-        return(
-          <Tag color={color}>{status}</Tag>
-        )
-        // let color
-        // if (tag === 'Not Started') {
-        //   color = '';
-        // } else if (tag === 'In Progress') {
-        //   color = 'blue'
-        // } else if (tag === 'On Schedule-In Progress') {
-        //   color = 'blue'
-        // } else if (tag === 'OnSchedule-Done') {
-        //   color = 'green'
-        // } else if (tag === 'Over Schedule-In Progress') {
-        //   color = 'red'
-        // } else if (tag === 'Over Schedule-Done') {
-        //   color = 'orange'
-        // }
-        // return (
-        //   <Tag color={color}>{tag}</Tag>
-        // );
-      }
-    },
-    {
       title: 'PO Number',
       dataIndex: 'poNumber',
       width: '100px',
@@ -182,15 +134,6 @@ export default function ProjectTrackingPM(){
           status = 'Overlimit'
           color = 'orange'
         }
-            // if (tag === 'Inadequate') {
-            //   color = 'red';
-            // } else if (tag === 'Sufficient') {
-            //   color = 'green'
-            // } else if (tag === 'Borderline') {
-            //   color = 'yellow'
-            // } else if (tag === 'Overlimit') {
-            //   color = 'orange'
-            // }
         return (
           <Tag color={color}>{status}</Tag>
         );
@@ -257,6 +200,37 @@ export default function ProjectTrackingPM(){
       width: '100px',
     },
     {
+      title: 'Project Status',
+      dataIndex: 'projectStatus',
+      width: '170px',
+      render: (tag, record) => {
+        let color
+        let status
+        if(record.projectPlanStatus !== 'Approved'){
+          color = ''
+          status = 'Not Started'
+        } else if (!record.projectProgress || !record.projectEndActual){
+          color = 'blue'
+          status = 'In Progress'
+        } else if (record.projectProgress < 100 && moment(record.projectEndActual, 'YYYY-MM-DD') <= moment(record.projectEnd,'DD-MM-YYYY')){
+          color = 'blue'
+          status = 'On Schedule-In Progress'
+        } else if (record.projectProgress === 100 && moment(record.projectEndActual, 'YYYY-MM-DD') <= moment(record.projectEnd,'DD-MM-YYYY')){
+          color = 'green'
+          status = 'On Schedule-Done'
+        } else if (record.projectProgress < 100 && moment(record.projectEndActual, 'YYYY-MM-DD') > moment(record.projectEnd,'DD-MM-YYYY')){
+          color = 'red'
+          status = 'Over Schedule-In Progress'
+        } else if (record.projectProgress === 100 && moment(record.projectEndActual, 'YYYY-MM-DD') > moment(record.projectEnd,'DD-MM-YYYY')){
+          color = 'orange'
+          status = 'Over Schedule-Done'
+        }
+        return(
+          <Tag color={color}>{status}</Tag>
+        )
+      }
+    },
+    {
       title: 'Action',
       dataIndex: 'action',
       fixed: 'right',
@@ -280,7 +254,7 @@ export default function ProjectTrackingPM(){
                       projectEndActual: record.projectEndActual? moment(record.projectEndActual, 'YYYY-MM-DD'): null,
                       projectProgress: record.projectProgress
                     })
-                    setProjectChoose(record.key)
+                    setProjectChoose(record)
                     setModalUpdate(true)
                   }
                   } 
@@ -296,7 +270,7 @@ export default function ProjectTrackingPM(){
   function onFinish(values){
     try{
       setLoading(true)
-      database.projects.doc(projectChoose).update({
+      database.projects.doc(projectChoose.key).update({
         term1Actual: values.term1Actual? values['term1Actual'].format('YYYY-MM-DD') : null,
         term1Status: values.term1Status? values.term1Status : null,
         term2Actual: values.term2Actual? values['term2Actual'].format('YYYY-MM-DD') : null,
@@ -318,6 +292,7 @@ export default function ProjectTrackingPM(){
       console.log(err)
       setLoading(false)
     }
+    setModalUpdate(false)
   }
 
     return(
@@ -329,7 +304,8 @@ export default function ProjectTrackingPM(){
           bordered 
           scroll={{y: 800 }}
         />
-        <Modal 
+        <Modal
+          style={{ top: 20 }}
           title="Update Progress" 
           visible={modalUpdate}
           footer={null}
@@ -339,15 +315,15 @@ export default function ProjectTrackingPM(){
             form.resetFields()
           }}
         >
+          {projectChoose && <h6>Project Code: {projectChoose.projectCode}</h6>}
+          {projectChoose && <h6>Project Name: {projectChoose.projectName}</h6>}
+          <br/>
           <Form
             form={form}
             layout="vertical"
             onFinish={onFinish}
             autoComplete="off"
             size="small"
-            // labelCol={{ span: 10 }}
-            // wrapperCol={{ span: 20 }}
-            // layout="horizontal"
           >
           <Input.Group compact>
           <Form.Item name="term1Actual" label="Term 1 Actual">
@@ -357,7 +333,7 @@ export default function ProjectTrackingPM(){
             label="Term 1 Status"
             name="term1Status"
           >
-            <Select>
+            <Select allowClear>
               <Select.Option key="done" value="Done">Done</Select.Option>
               <Select.Option key="notyet" value="Not Yet">Not Yet</Select.Option>
               <Select.Option key="na" value="N/A">N/A</Select.Option>
@@ -372,7 +348,7 @@ export default function ProjectTrackingPM(){
             label="Term 2 Status"
             name="term2Status"
           >
-            <Select>
+            <Select allowClear>
               <Select.Option key="done" value="Done">Done</Select.Option>
               <Select.Option key="notyet" value="Not Yet">Not Yet</Select.Option>
               <Select.Option key="na" value="N/A">N/A</Select.Option>
@@ -387,7 +363,7 @@ export default function ProjectTrackingPM(){
             label="Term 3 Status"
             name="term3Status"
           >
-            <Select>
+            <Select allowClear>
               <Select.Option key="done" value="Done">Done</Select.Option>
               <Select.Option key="notyet" value="Not Yet">Not Yet</Select.Option>
               <Select.Option key="na" value="N/A">N/A</Select.Option>
@@ -402,7 +378,7 @@ export default function ProjectTrackingPM(){
             label="Term 4 Status"
             name="term4Status"
           >
-            <Select>
+            <Select allowClear>
               <Select.Option key="done" value="Done">Done</Select.Option>
               <Select.Option key="notyet" value="Not Yet">Not Yet</Select.Option>
               <Select.Option key="na" value="N/A">N/A</Select.Option>
@@ -417,7 +393,7 @@ export default function ProjectTrackingPM(){
             label="Term 5 Status"
             name="term5Status"
           >
-            <Select>
+            <Select allowClear>
               <Select.Option key="done" value="Done">Done</Select.Option>
               <Select.Option key="notyet" value="Not Yet">Not Yet</Select.Option>
               <Select.Option key="na" value="N/A">N/A</Select.Option>

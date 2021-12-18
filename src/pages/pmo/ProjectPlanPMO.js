@@ -196,7 +196,7 @@ export default function DashboardPMO() {
           "projectEnd": values['projectEnd'].format('DD-MM-YYYY'),
           "projectManager": values.projectManager,
           "projectPlanStatus": "Waiting for Submit",
-          "projectStatus": null,
+          // "projectStatus": null,
           "poNumber" : null,
           "poYear" : null,
           "methodology" : null,

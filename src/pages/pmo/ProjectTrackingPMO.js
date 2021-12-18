@@ -111,23 +111,6 @@ export default function ProjectTrackingPMO(){
         return(
           <Tag color={color}>{status}</Tag>
         )
-        // let color
-        // if (tag === 'Not Started') {
-        //   color = '';
-        // } else if (tag === 'In Progress') {
-        //   color = 'blue'
-        // } else if (tag === 'On Schedule-In Progress') {
-        //   color = 'blue'
-        // } else if (tag === 'OnSchedule-Done') {
-        //   color = 'green'
-        // } else if (tag === 'Over Schedule-In Progress') {
-        //   color = 'red'
-        // } else if (tag === 'Over Schedule-Done') {
-        //   color = 'orange'
-        // }
-        // return (
-        //   <Tag color={color}>{tag}</Tag>
-        // );
       }
     },
     {
@@ -211,11 +194,37 @@ export default function ProjectTrackingPMO(){
       title: 'Schedule',
       dataIndex: 'schedule',
       width: '100px',
+      render: (tag) => {
+        let color
+        if(tag === 'Behind Schedule') {
+          color = 'green'
+        } else if(tag === 'On Schedule'){
+          color = 'yellow'
+        } else if(tag === 'Ahead Schedule'){
+          color = 'red'
+        }
+        return(
+          <Tag color={color}>{tag}</Tag>
+        )
+      }
     },
     {
       title: 'Budget',
       dataIndex: 'budget',
       width: '100px',
+      render: (tag) => {
+        let color
+        if(tag === 'Under Budget') {
+          color = 'green'
+        } else if(tag === 'On Budget'){
+          color = 'yellow'
+        } else if(tag === 'Over Budget'){
+          color = 'red'
+        }
+        return(
+          <Tag color={color}>{tag}</Tag>
+        )
+      }
     },
     {
       title: 'Risk',
@@ -348,6 +357,37 @@ export default function ProjectTrackingPMO(){
       width: '100px',
     },
     {
+      title: 'Project Status',
+      dataIndex: 'projectStatus',
+      width: '170px',
+      render: (tag, record) => {
+        let color
+        let status
+        if(record.projectPlanStatus !== 'Approved'){
+          color = ''
+          status = 'Not Started'
+        } else if (!record.projectProgress || !record.projectEndActual){
+          color = 'blue'
+          status = 'In Progress'
+        } else if (record.projectProgress < 100 && moment(record.projectEndActual, 'YYYY-MM-DD') <= moment(record.projectEnd,'DD-MM-YYYY')){
+          color = 'blue'
+          status = 'On Schedule-In Progress'
+        } else if (record.projectProgress === 100 && moment(record.projectEndActual, 'YYYY-MM-DD') <= moment(record.projectEnd,'DD-MM-YYYY')){
+          color = 'green'
+          status = 'On Schedule-Done'
+        } else if (record.projectProgress < 100 && moment(record.projectEndActual, 'YYYY-MM-DD') > moment(record.projectEnd,'DD-MM-YYYY')){
+          color = 'red'
+          status = 'Over Schedule-In Progress'
+        } else if (record.projectProgress === 100 && moment(record.projectEndActual, 'YYYY-MM-DD') > moment(record.projectEnd,'DD-MM-YYYY')){
+          color = 'orange'
+          status = 'Over Schedule-Done'
+        }
+        return(
+          <Tag color={color}>{status}</Tag>
+        )
+      }
+    },
+    {
       title: 'Action',
       dataIndex: 'action',
       fixed: 'right',
@@ -373,7 +413,7 @@ export default function ProjectTrackingPMO(){
                     term4Deadline: record.term4Deadline ? moment(record.term4Deadline, 'YYYY-MM-DD'): null,
                     term5Deadline: record.term5Deadline ? moment(record.term5Deadline, 'YYYY-MM-DD'): null,
                   })
-                  setProjectChoose(record.key)
+                  setProjectChoose(record)
                   setModalUpdate(true)}
                   } 
                 />
@@ -388,7 +428,7 @@ export default function ProjectTrackingPMO(){
   function onFinish(values){
     try{
       setLoading(true)
-      database.projects.doc(projectChoose).update({
+      database.projects.doc(projectChoose.key).update({
         poNumber: values.poNumber ? values.poNumber : null,
         poYear: values.poYear ? values.poYear : null,
         methodology: values.methodology? values.methodology : null,
@@ -413,6 +453,7 @@ export default function ProjectTrackingPMO(){
       message.error("Failed update data")
       setLoading(false)
     }
+    setModalUpdate(false)
   }
     return(
       <>
@@ -424,6 +465,7 @@ export default function ProjectTrackingPMO(){
           scroll={{y: 800 }}
         />
         <Modal 
+          style={{ top: 20 }}
           title="Update Project" 
           visible={modalUpdate}
           footer={null}
@@ -433,6 +475,9 @@ export default function ProjectTrackingPMO(){
             form.resetFields()
           }}
         >
+          {projectChoose && <h6>Project Code: {projectChoose.projectCode}</h6>}
+          {projectChoose && <h6>Project Name: {projectChoose.projectName}</h6>}
+          <br/>
           <Form
             form={form}
             layout="vertical"
