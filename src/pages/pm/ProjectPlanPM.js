@@ -4,7 +4,6 @@ import { UploadOutlined } from '@ant-design/icons';
 
 import { useAuth } from '../../authConfig/AuthContext';
 import { database, storage } from '../../authConfig/firebase';
-import moment from 'moment'
 
 export default function DashboardPM() {
   const {currentUser} = useAuth()
@@ -70,30 +69,41 @@ export default function DashboardPM() {
       title: 'Project Status',
       dataIndex: 'projectStatus',
       width: '170px',
-      render: (tag, record) => {
+      render: (tag) => {
         let color
-        let status
-        if(record.projectPlanStatus !== 'Approved'){
+        if(tag === 'Not Started'){
           color = ''
-          status = 'Not Started'
-        } else if (!record.projectProgress || !record.projectEndActual){
+        } else if (tag === 'In Progress' || tag === 'On Schedule-In Progress'){
           color = 'blue'
-          status = 'In Progress'
-        } else if (record.projectProgress < 100 && moment(record.projectEndActual, 'YYYY-MM-DD') <= moment(record.projectEnd,'DD-MM-YYYY')){
-          color = 'blue'
-          status = 'On Schedule-In Progress'
-        } else if (record.projectProgress === 100 && moment(record.projectEndActual, 'YYYY-MM-DD') <= moment(record.projectEnd,'DD-MM-YYYY')){
+        } else if(tag === 'On Schedule-Done'){
           color = 'green'
-          status = 'On Schedule-Done'
-        } else if (record.projectProgress < 100 && moment(record.projectEndActual, 'YYYY-MM-DD') > moment(record.projectEnd,'DD-MM-YYYY')){
+        } else if(tag === 'Over Schedule-In Progress'){
           color = 'red'
-          status = 'Over Schedule-In Progress'
-        } else if (record.projectProgress === 100 && moment(record.projectEndActual, 'YYYY-MM-DD') > moment(record.projectEnd,'DD-MM-YYYY')){
+        } else if(tag === 'Over Schedule-Done'){
           color = 'orange'
-          status = 'Over Schedule-Done'
         }
+        // let status
+        // if(record.projectPlanStatus !== 'Approved'){
+        //   color = ''
+        //   status = 'Not Started'
+        // } else if (!record.projectProgress || !record.projectEndActual){
+        //   color = 'blue'
+        //   status = 'In Progress'
+        // } else if (record.projectProgress < 100 && moment(record.projectEndActual, 'YYYY-MM-DD') <= moment(record.projectEnd,'DD-MM-YYYY')){
+        //   color = 'blue'
+        //   status = 'On Schedule-In Progress'
+        // } else if (record.projectProgress === 100 && moment(record.projectEndActual, 'YYYY-MM-DD') <= moment(record.projectEnd,'DD-MM-YYYY')){
+        //   color = 'green'
+        //   status = 'On Schedule-Done'
+        // } else if (record.projectProgress < 100 && moment(record.projectEndActual, 'YYYY-MM-DD') > moment(record.projectEnd,'DD-MM-YYYY')){
+        //   color = 'red'
+        //   status = 'Over Schedule-In Progress'
+        // } else if (record.projectProgress === 100 && moment(record.projectEndActual, 'YYYY-MM-DD') > moment(record.projectEnd,'DD-MM-YYYY')){
+        //   color = 'orange'
+        //   status = 'Over Schedule-Done'
+        // }
         return(
-          <Tag color={color}>{status}</Tag>
+          <Tag color={color}>{tag}</Tag>
         )
       }
     },

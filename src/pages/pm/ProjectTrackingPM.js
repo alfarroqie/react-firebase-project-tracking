@@ -205,28 +205,39 @@ export default function ProjectTrackingPM(){
       width: '170px',
       render: (tag, record) => {
         let color
-        let status
-        if(record.projectPlanStatus !== 'Approved'){
+        if(tag === 'Not Started'){
           color = ''
-          status = 'Not Started'
-        } else if (!record.projectProgress || !record.projectEndActual){
+        } else if (tag === 'In Progress' || tag === 'On Schedule-In Progress'){
           color = 'blue'
-          status = 'In Progress'
-        } else if (record.projectProgress < 100 && moment(record.projectEndActual, 'YYYY-MM-DD') <= moment(record.projectEnd,'DD-MM-YYYY')){
-          color = 'blue'
-          status = 'On Schedule-In Progress'
-        } else if (record.projectProgress === 100 && moment(record.projectEndActual, 'YYYY-MM-DD') <= moment(record.projectEnd,'DD-MM-YYYY')){
+        } else if(tag === 'On Schedule-Done'){
           color = 'green'
-          status = 'On Schedule-Done'
-        } else if (record.projectProgress < 100 && moment(record.projectEndActual, 'YYYY-MM-DD') > moment(record.projectEnd,'DD-MM-YYYY')){
+        } else if(tag === 'Over Schedule-In Progress'){
           color = 'red'
-          status = 'Over Schedule-In Progress'
-        } else if (record.projectProgress === 100 && moment(record.projectEndActual, 'YYYY-MM-DD') > moment(record.projectEnd,'DD-MM-YYYY')){
+        } else if(tag === 'Over Schedule-Done'){
           color = 'orange'
-          status = 'Over Schedule-Done'
         }
+        // let status
+        // if(record.projectPlanStatus !== 'Approved'){
+        //   color = ''
+        //   status = 'Not Started'
+        // } else if (!record.projectProgress || !record.projectEndActual){
+        //   color = 'blue'
+        //   status = 'In Progress'
+        // } else if (record.projectProgress < 100 && moment(record.projectEndActual, 'YYYY-MM-DD') <= moment(record.projectEnd,'DD-MM-YYYY')){
+        //   color = 'blue'
+        //   status = 'On Schedule-In Progress'
+        // } else if (record.projectProgress === 100 && moment(record.projectEndActual, 'YYYY-MM-DD') <= moment(record.projectEnd,'DD-MM-YYYY')){
+        //   color = 'green'
+        //   status = 'On Schedule-Done'
+        // } else if (record.projectProgress < 100 && moment(record.projectEndActual, 'YYYY-MM-DD') > moment(record.projectEnd,'DD-MM-YYYY')){
+        //   color = 'red'
+        //   status = 'Over Schedule-In Progress'
+        // } else if (record.projectProgress === 100 && moment(record.projectEndActual, 'YYYY-MM-DD') > moment(record.projectEnd,'DD-MM-YYYY')){
+        //   color = 'orange'
+        //   status = 'Over Schedule-Done'
+        // }
         return(
-          <Tag color={color}>{status}</Tag>
+          <Tag color={color}>{tag}</Tag>
         )
       }
     },
@@ -270,6 +281,18 @@ export default function ProjectTrackingPM(){
   function onFinish(values){
     try{
       setLoading(true)
+      let status = 'In Progress'
+      if(values.projectProgress && values.projectEndActual){
+        if(values.projectProgress < 100 && values.projectEndActual <= moment(projectChoose.projectEnd, 'DD-MM-YYYY')){
+          status = 'On Schedule-In Progress'
+        } else if (values.projectProgress === 100 && values.projectEndActual <= moment(projectChoose.projectEnd, 'DD-MM-YYYY')){
+          status = 'On Schedule-Done'
+        } else if (values.projectProgress < 100 && values.projectEndActual > moment(projectChoose.projectEnd, 'DD-MM-YYYY')){
+          status = 'Over Schedule-In Progress'
+        } else if (values.projectProgress === 100 && values.projectEndActual > moment(projectChoose.projectEnd, 'DD-MM-YYYY')){
+          status = 'Over Schedule-Done'
+        }
+      }
       database.projects.doc(projectChoose.key).update({
         term1Actual: values.term1Actual? values['term1Actual'].format('YYYY-MM-DD') : null,
         term1Status: values.term1Status? values.term1Status : null,
@@ -282,7 +305,8 @@ export default function ProjectTrackingPM(){
         term5Actual: values.term5Actual? values['term5Actual'].format('YYYY-MM-DD') : null,
         term5Status: values.term5Status? values.term5Status : null,
         projectEndActual: values.projectEndActual? values['projectEndActual'].format('YYYY-MM-DD') : null,
-        projectProgress: values.projectProgress? values.projectProgress : null
+        projectProgress: values.projectProgress? values.projectProgress : null,
+        projectStatus: status
       })
       message.success("Success update data")
       form.resetFields()

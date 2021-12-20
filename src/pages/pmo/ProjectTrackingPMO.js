@@ -83,37 +83,6 @@ export default function ProjectTrackingPMO(){
       }
     },
     {
-      title: 'Project Status',
-      dataIndex: 'projectStatus',
-      width: '170px',
-      render: (tag, record) => {
-        let color
-        let status
-        if(record.projectPlanStatus !== 'Approved'){
-          color = ''
-          status = 'Not Started'
-        } else if (!record.projectProgress || !record.projectEndActual){
-          color = 'blue'
-          status = 'In Progress'
-        } else if (record.projectProgress < 100 && moment(record.projectEndActual, 'YYYY-MM-DD') <= moment(record.projectEnd,'DD-MM-YYYY')){
-          color = 'blue'
-          status = 'On Schedule-In Progress'
-        } else if (record.projectProgress === 100 && moment(record.projectEndActual, 'YYYY-MM-DD') <= moment(record.projectEnd,'DD-MM-YYYY')){
-          color = 'green'
-          status = 'On Schedule-Done'
-        } else if (record.projectProgress < 100 && moment(record.projectEndActual, 'YYYY-MM-DD') > moment(record.projectEnd,'DD-MM-YYYY')){
-          color = 'red'
-          status = 'Over Schedule-In Progress'
-        } else if (record.projectProgress === 100 && moment(record.projectEndActual, 'YYYY-MM-DD') > moment(record.projectEnd,'DD-MM-YYYY')){
-          color = 'orange'
-          status = 'Over Schedule-Done'
-        }
-        return(
-          <Tag color={color}>{status}</Tag>
-        )
-      }
-    },
-    {
       title: 'PO Number',
       dataIndex: 'poNumber',
       width: '100px'
@@ -161,15 +130,6 @@ export default function ProjectTrackingPMO(){
           status = 'Overlimit'
           color = 'orange'
         }
-            // if (tag === 'Inadequate') {
-            //   color = 'red';
-            // } else if (tag === 'Sufficient') {
-            //   color = 'green'
-            // } else if (tag === 'Borderline') {
-            //   color = 'yellow'
-            // } else if (tag === 'Overlimit') {
-            //   color = 'orange'
-            // }
         return (
           <Tag color={color}>{status}</Tag>
         );
@@ -230,44 +190,17 @@ export default function ProjectTrackingPMO(){
       title: 'Risk',
       dataIndex: 'risk',
       width: '100px',
-      render: (tag,record) => {
+      render: (tag) => {
             let color
-            let status
-            if (!record.budget || !record.schedule) {
-              status = ''
-              color = ''
-            } else if (
-              (record.schedule === 'Behind Schedule' && record.budget === 'Under Budget') ||
-              (record.schedule === 'On Schedule' && record.budget === 'Under Budget') ||
-              (record.schedule === 'Behind Schedule' && record.budget === 'On Budget') ||
-              (record.schedule === 'On Schedule' && record.budget === 'On Budget')
-            ) {
-              status = 'Low Risk'
-              color = 'green'
-            } else if (
-              (record.schedule === 'Ahead Schedule' && record.budget === 'Under Budget') ||
-              (record.schedule === 'Ahead Schedule' && record.budget === 'On Budget')
-            ) {
-              status = 'Medium Risk'
+            if (tag === 'Low Risk') {
+              color = 'green';
+            } else if (tag === 'Medium Risk') {
               color = 'yellow'
-            } else if (
-              (record.schedule === 'Ahead Schedule' && record.budget === 'Over Budget') ||
-              (record.schedule === 'On Schedule' && record.budget === 'Over Budget') ||
-              (record.schedule === 'Behind Schedule' && record.budget === 'Over Budget')
-            ) {
-              status = 'High Risk'
+            } else if (tag === 'High Risk') {
               color = 'red'
             }
-
-            // if (tag === 'Low Risk') {
-            //   color = 'green';
-            // } else if (tag === 'Medium Risk') {
-            //   color = 'yellow'
-            // } else if (tag === 'High Risk') {
-            //   color = 'red'
-            // }
             return (
-              <Tag color={color}>{status}</Tag>
+              <Tag color={color}>{tag}</Tag>
             );
       }
     },
@@ -362,28 +295,39 @@ export default function ProjectTrackingPMO(){
       width: '170px',
       render: (tag, record) => {
         let color
-        let status
-        if(record.projectPlanStatus !== 'Approved'){
+        if(tag === 'Not Started'){
           color = ''
-          status = 'Not Started'
-        } else if (!record.projectProgress || !record.projectEndActual){
+        } else if (tag === 'In Progress' || tag === 'On Schedule-In Progress'){
           color = 'blue'
-          status = 'In Progress'
-        } else if (record.projectProgress < 100 && moment(record.projectEndActual, 'YYYY-MM-DD') <= moment(record.projectEnd,'DD-MM-YYYY')){
-          color = 'blue'
-          status = 'On Schedule-In Progress'
-        } else if (record.projectProgress === 100 && moment(record.projectEndActual, 'YYYY-MM-DD') <= moment(record.projectEnd,'DD-MM-YYYY')){
+        } else if(tag === 'On Schedule-Done'){
           color = 'green'
-          status = 'On Schedule-Done'
-        } else if (record.projectProgress < 100 && moment(record.projectEndActual, 'YYYY-MM-DD') > moment(record.projectEnd,'DD-MM-YYYY')){
+        } else if(tag === 'Over Schedule-In Progress'){
           color = 'red'
-          status = 'Over Schedule-In Progress'
-        } else if (record.projectProgress === 100 && moment(record.projectEndActual, 'YYYY-MM-DD') > moment(record.projectEnd,'DD-MM-YYYY')){
+        } else if(tag === 'Over Schedule-Done'){
           color = 'orange'
-          status = 'Over Schedule-Done'
         }
+        // let status
+        // if(record.projectPlanStatus !== 'Approved'){
+        //   color = ''
+        //   status = 'Not Started'
+        // } else if (!record.projectProgress || !record.projectEndActual){
+        //   color = 'blue'
+        //   status = 'In Progress'
+        // } else if (record.projectProgress < 100 && moment(record.projectEndActual, 'YYYY-MM-DD') <= moment(record.projectEnd,'DD-MM-YYYY')){
+        //   color = 'blue'
+        //   status = 'On Schedule-In Progress'
+        // } else if (record.projectProgress === 100 && moment(record.projectEndActual, 'YYYY-MM-DD') <= moment(record.projectEnd,'DD-MM-YYYY')){
+        //   color = 'green'
+        //   status = 'On Schedule-Done'
+        // } else if (record.projectProgress < 100 && moment(record.projectEndActual, 'YYYY-MM-DD') > moment(record.projectEnd,'DD-MM-YYYY')){
+        //   color = 'red'
+        //   status = 'Over Schedule-In Progress'
+        // } else if (record.projectProgress === 100 && moment(record.projectEndActual, 'YYYY-MM-DD') > moment(record.projectEnd,'DD-MM-YYYY')){
+        //   color = 'orange'
+        //   status = 'Over Schedule-Done'
+        // }
         return(
-          <Tag color={color}>{status}</Tag>
+          <Tag color={color}>{tag}</Tag>
         )
       }
     },
@@ -428,6 +372,28 @@ export default function ProjectTrackingPMO(){
   function onFinish(values){
     try{
       setLoading(true)
+      let statusRisk = null
+      if(values.budget && values.schedule){
+        if (
+          (values.schedule === 'Behind Schedule' && values.budget === 'Under Budget') ||
+          (values.schedule === 'On Schedule' && values.budget === 'Under Budget') ||
+          (values.schedule === 'Behind Schedule' && values.budget === 'On Budget') ||
+          (values.schedule === 'On Schedule' && values.budget === 'On Budget')
+        ) {
+          statusRisk = 'Low Risk'
+        } else if (
+          (values.schedule === 'Ahead Schedule' && values.budget === 'Under Budget') ||
+          (values.schedule === 'Ahead Schedule' && values.budget === 'On Budget')
+        ) {
+          statusRisk = 'Medium Risk'
+        } else if (
+          (values.schedule === 'Ahead Schedule' && values.budget === 'Over Budget') ||
+          (values.schedule === 'On Schedule' && values.budget === 'Over Budget') ||
+          (values.schedule === 'Behind Schedule' && values.budget === 'Over Budget')
+        ) {
+          statusRisk = 'High Risk'
+        }
+      }
       database.projects.doc(projectChoose.key).update({
         poNumber: values.poNumber ? values.poNumber : null,
         poYear: values.poYear ? values.poYear : null,
@@ -439,6 +405,7 @@ export default function ProjectTrackingPMO(){
         value: values.value ? values.value : null,
         schedule: values.schedule ? values.schedule : null,
         budget: values.budget ? values.budget : null,
+        risk: statusRisk? statusRisk: null,
         term1Deadline: values.term1Deadline? values['term1Deadline'].format('YYYY-MM-DD') : null,
         term2Deadline: values.term2Deadline? values['term2Deadline'].format('YYYY-MM-DD') : null,
         term3Deadline: values.term3Deadline? values['term3Deadline'].format('YYYY-MM-DD') : null,

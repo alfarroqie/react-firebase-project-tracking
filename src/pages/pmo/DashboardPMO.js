@@ -14,7 +14,7 @@ export default function DashboardPMO(){
   useEffect(() =>{
     let isSubscribed = true
     if (isSubscribed) {
-      database.projects.where('projectPlanStatus', '==', 'Approved').onSnapshot(snapshot => {
+      database.projects.onSnapshot(snapshot => {
           var data = snapshot.docs.map(database.formatDoc)
           setDataProject(data)
       })
@@ -26,8 +26,16 @@ export default function DashboardPMO(){
     if(!dataProject){
       return null
     }
+    const totalProject = dataProject.length
+    const notStarted = dataProject.filter(item => item.projectStatus === 'Not Started').length
+    const inProgress = dataProject.filter(item => item.projectStatus === 'In Progress').length
+    const onScheduleDone = dataProject.filter(item => item.projectStatus === 'On Schedule-Done').length
+    const onScheduleInProgress = dataProject.filter(item => item.projectStatus === 'On Schedule-In Progress').length
+    const overScheduleDone = dataProject.filter(item => item.projectStatus === 'Over Schedule-Done').length
+    const overScheduleInProgress = dataProject.filter(item => item.projectStatus === 'On Schedule-In Progress').length
+
     const resultSchedule= [];
-    const sumSchedule = dataProject.map((item) => {
+    const sumSchedule = dataProject.filter(item => item.projectPlanStatus === 'Approved').map((item) => {
       return{
         poYear: item.poYear,
         schedule: item.schedule,
@@ -44,7 +52,7 @@ export default function DashboardPMO(){
     }, {});
 
     const resultBudget= [];
-    const sumBudget = dataProject.map((item) => {
+    const sumBudget = dataProject.filter(item => item.projectPlanStatus === 'Approved').map((item) => {
       return{
         poYear: item.poYear,
         budget: item.budget,
@@ -60,32 +68,40 @@ export default function DashboardPMO(){
       return res;
     }, {});
 
-    // const resultRisk= [];
-    // const sumRisk = dataProject.map((item) => {
-    //   return{
-    //     risk: item.risk,
-    //     count: 1
-    //   }
-    // })
-    // sumRisk.reduce(function(res, value) {
-    //   if(!res[value.risk]) {
-    //     res[value.risk] = {risk: value.risk, count: 0}
-    //     resultRisk.push(res[value.risk])
-    //   }
-    //   res[value.risk].count += value.count
-    //   return res;
-    // }, {});
+    const resultRisk= [];
+    const sumRisk = dataProject.filter(item => item.projectPlanStatus === 'Approved').map((item) => {
+      return{
+        risk: item.risk,
+        count: 1
+      }
+    })
+    sumRisk.reduce(function(res, value) {
+      if(!res[value.risk]) {
+        res[value.risk] = {risk: value.risk, count: 0}
+        resultRisk.push(res[value.risk])
+      }
+      res[value.risk].count += value.count
+      return res;
+    }, {});
 
-    return {resultSchedule, resultBudget}
+    return {totalProject, notStarted, inProgress, onScheduleDone, onScheduleInProgress,
+       overScheduleDone, overScheduleInProgress, resultSchedule, resultBudget, resultRisk}
   }
+  function handleChange(values){
+    console.log(values)
+  }
+  
   const resData = getSummaryData()
+
     return(
       <>
         <Card>
-          <Select allowClear style={{width: 120}}>
-            <Select.Option key="1" value=""> test</Select.Option> 
-            <Select.Option key="2" value=""> test</Select.Option> 
-            <Select.Option key="3" value=""> test</Select.Option> 
+          <Select style={{width: 120}} onChange={handleChange}>
+            {/* {dataProject && dataProject.map(item => item.poYear).reduce().map((item) =>{
+              return(
+                <Select.Option key={item} value={item}> {item} </Select.Option>
+              )
+            })} */}
           </Select>
 
           {/* Project */}
@@ -94,7 +110,7 @@ export default function DashboardPMO(){
               <Card title="Total Project"style={{height: 220, textAlign: 'center'}}>
                 {/* Total Project */}
                 <p><ProjectTwoTone style={{ fontSize: '30px'}}/></p>
-                <h1>X</h1>
+                {resData && <h1>{resData.totalProject}</h1>}
               </Card> 
             </Col> 
             <Col span={6}>
@@ -102,7 +118,7 @@ export default function DashboardPMO(){
                 <Col span={24}>
                   <Card size="small" title="Not Started" style={{height: 110, textAlign: 'center'}}>
                     <p><StopTwoTone twoToneColor='grey' style={{fontSize: '20px'}}/></p>
-                    <h6>X</h6>
+                    {resData && <h6>{resData.notStarted}</h6>}
                   </Card>
                 </Col>
               </Row>
@@ -110,7 +126,7 @@ export default function DashboardPMO(){
                 <Col span={24}>
                   <Card size="small" title="In Progress" style={{height: 110, textAlign: 'center'}}>
                     <p><QuestionCircleTwoTone twoToneColor='blue' style={{fontSize: '20px'}}/></p>
-                    <h6>X</h6>
+                    {resData && <h6>{resData.inProgress}</h6>}
                   </Card>
                 </Col>
               </Row>
@@ -120,7 +136,7 @@ export default function DashboardPMO(){
                 <Col span={24}>
                   <Card size="small" title="On Schedule-Done" style={{height: 110, textAlign: 'center'}}>
                     <p><CheckCircleTwoTone twoToneColor='green' style={{fontSize: '20px'}}/></p>
-                    <h6>X</h6>
+                    {resData && <h6>{resData.onScheduleDone}</h6>}
                   </Card>
                 </Col>
               </Row>
@@ -128,7 +144,7 @@ export default function DashboardPMO(){
                 <Col span={24}>
                   <Card size="small" title="On Schedule-In Progress" style={{height: 110, textAlign: 'center'}}>
                     <p><ClockCircleTwoTone twoToneColor='blue' style={{fontSize: '20px'}}/></p>
-                    <h6>X</h6>
+                    {resData && <h6>{resData.onScheduleInProgress}</h6>}
                   </Card>
                 </Col>
               </Row>
@@ -138,7 +154,7 @@ export default function DashboardPMO(){
                 <Col span={24}>
                   <Card size="small" title="Over Schedule-Done" style={{height: 110, textAlign: 'center'}}>
                     <p><ExclamationCircleTwoTone twoToneColor='orange' style={{fontSize: '20px'}}/></p>
-                    <h6>X</h6>
+                    {resData && <h6>{resData.overScheduleDone}</h6>}
                   </Card>
                 </Col>
               </Row>
@@ -146,14 +162,15 @@ export default function DashboardPMO(){
                 <Col span={24}>
                   <Card size="small" title="Over Schedule-In Progress" style={{height: 110, textAlign: 'center'}}>
                     <p><WarningTwoTone twoToneColor='red' style={{fontSize: '20px'}}/></p>
-                    <h6>X</h6>
+                    {resData && <h6>{resData.overScheduleInProgress}</h6>}
                   </Card>
                 </Col>
               </Row>
             </Col>
           </Row>
           {/* Summary */}
-          <Row style={{marginTop: 10}}>
+          <Card title="Project Tracking" style={{marginTop: 10}}>
+          <Row>
             <Col span={8}>
               <Card title="Summary Schedule" style={{textAlign: 'center'}}>
                 {resData && <Chart name="schedule" dataChart={resData.resultSchedule} />}
@@ -164,8 +181,13 @@ export default function DashboardPMO(){
                 {resData && <Chart name="budget" dataChart={resData.resultBudget} />}
               </Card>
             </Col> 
-            <Col span={8}> <Card title="Summary Risk" style={{textAlign: 'center'}}>test</Card> </Col> 
+            <Col span={8}>
+              <Card title="Summary Risk" style={{textAlign: 'center'}}>
+                {resData && <Chart name="risk" dataChart={resData.resultRisk} />}
+              </Card>
+            </Col> 
           </Row>
+          </Card>
         </Card>
       </>
     )
