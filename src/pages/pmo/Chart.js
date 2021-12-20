@@ -24,21 +24,23 @@ export default function Chart (data) {
     pieSeries.labels.template.disabled = true;
     pieSeries.ticks.template.disabled = true;
 
-    // // // //grouping 
-    // let grouper = pieSeries.plugins.push(new am4plugins_sliceGrouper.SliceGrouper());
-    // grouper.threshold = 2.5;
-    // grouper.groupName = "Other";
-    // grouper.clickBehavior = "zoom";
-
-    // chart.legend = new am4charts.Legend();
-    // chart.legend.position = "right";
-    // chart.legend.valign = "middle";
+    //legend
+    chart.legend = new am4charts.Legend();
+    chart.legend.fontSize = 14;
+    chart.legend.position = "bottom";
+    chart.legend.valign = "middle";
     // chart.legend.scrollable = true;
+    chart.legend.useDefaultMarker = true;
+    var marker = chart.legend.markers.template.children.getIndex(0);
+    marker.cornerRadius(12, 12, 12, 12);
+    marker.strokeWidth = 2;
+    marker.strokeOpacity = 1;
+    marker.stroke = am4core.color("#ccc");
   });
 
   return (
     <>
-        <div id={"chart" + data.name} style={{ width: "100%", height: "100px" }}></div>
+        <div id={"chart" + data.name} style={{height: "300px" }}></div>
     </>
   );
 }

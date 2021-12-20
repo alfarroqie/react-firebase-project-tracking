@@ -332,6 +332,11 @@ export default function ProjectTrackingPMO(){
       }
     },
     {
+      title: 'PMO Review',
+      dataIndex: 'pmoReview',
+      width: '100px',
+    },
+    {
       title: 'Action',
       dataIndex: 'action',
       fixed: 'right',
@@ -356,6 +361,7 @@ export default function ProjectTrackingPMO(){
                     term3Deadline: record.term3Deadline ? moment(record.term3Deadline, 'YYYY-MM-DD'): null,
                     term4Deadline: record.term4Deadline ? moment(record.term4Deadline, 'YYYY-MM-DD'): null,
                     term5Deadline: record.term5Deadline ? moment(record.term5Deadline, 'YYYY-MM-DD'): null,
+                    pmoReview: record.pmoReview
                   })
                   setProjectChoose(record)
                   setModalUpdate(true)}
@@ -411,6 +417,7 @@ export default function ProjectTrackingPMO(){
         term3Deadline: values.term3Deadline? values['term3Deadline'].format('YYYY-MM-DD') : null,
         term4Deadline: values.term4Deadline? values['term4Deadline'].format('YYYY-MM-DD') : null,
         term5Deadline: values.term5Deadline? values['term5Deadline'].format('YYYY-MM-DD') : null,
+        pmoReview: values.pmoReview? values.pmoReview : null
       })
       message.success("Success update data")
       form.resetFields()
@@ -526,6 +533,9 @@ export default function ProjectTrackingPMO(){
               <DatePicker />
           </Form.Item>
           </Input.Group>
+          <Form.Item name="pmoReview" label="PMO Review">
+            <Input.TextArea />
+          </Form.Item>
           <Form.Item>
             <Button type="primary" disabled={loading} htmlType="submit" className="w-100 text-center mt-3">
               Update

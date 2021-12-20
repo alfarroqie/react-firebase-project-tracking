@@ -32,7 +32,7 @@ export default function Login() {
       <>
       <div className="d-flex align-items-center justify-content-center"
       style={{ minHeight: "100vh" }}>
-        <Card title="Login" className="text-center mb-4" bordered={true} style={{ width: "400px" }} >
+        <Card title="NTI PROJECT TRACKING" className="text-center mb-4" bordered={true} style={{ width: "400px" }} >
         {error && <Alert
             message="Error"
             description={error}

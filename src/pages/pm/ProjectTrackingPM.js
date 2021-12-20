@@ -242,6 +242,11 @@ export default function ProjectTrackingPM(){
       }
     },
     {
+      title: 'PMO Review',
+      dataIndex: 'pmoReview',
+      width: '100px',
+    },
+    {
       title: 'Action',
       dataIndex: 'action',
       fixed: 'right',
