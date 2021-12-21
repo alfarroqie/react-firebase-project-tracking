@@ -14,6 +14,21 @@ export default function DashboardPM() {
   const [projectPlanFile, setProjectPlanFile] = useState()
   const [projectChoose, setProjectChoose] = useState()
 
+  const [templateProjectPlanUrl, setTemplateProjectPlanUrl] = useState()
+
+  //template Project plan
+  useEffect(() =>{
+    let isSubscribed = true
+    if (isSubscribed) {
+      database.templateProjectPlan.doc('template').onSnapshot(snapshot => {
+        if(snapshot.data()){
+          setTemplateProjectPlanUrl(snapshot.data().templateUrl)
+        }
+      })
+    }
+    return () => isSubscribed = false
+  },[])
+  
   // Data Project
   useEffect(() =>{
     let isSubscribed = true
@@ -195,6 +210,7 @@ export default function DashboardPM() {
       dataSource={dataProject} 
       size="small"
       bordered
+      title={() => <Button type="primary" shape="round" disabled={!templateProjectPlanUrl}><a href={templateProjectPlanUrl}>Download Template</a></Button>}
       scroll={{y: 400 }}/>
     <Modal 
       title="Project Plan" 

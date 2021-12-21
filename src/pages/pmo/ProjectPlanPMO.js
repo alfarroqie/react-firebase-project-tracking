@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import { Table, Button, Space, Form, Input, Select, Modal, DatePicker, message, Tooltip, Tag } from 'antd';
-import { CheckCircleOutlined, CloseCircleOutlined, BellOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, CloseCircleOutlined, BellOutlined, UploadOutlined } from '@ant-design/icons';
 
 import { database, storage } from '../../authConfig/firebase';
 import emailjs from 'emailjs-com'
@@ -9,12 +9,29 @@ import moment from 'moment'
 export default function DashboardPMO() {
   const [dataProject, setDataProject] = useState()
   const [dataPM, setDataPM] = useState([])
+
   const [modalCreate, setModalCreate] = useState(false)
   const [modalApprove, setModalApprove] = useState(false)
   const [modalReject, setModalReject] = useState(false)
   const [modalReview, setModalReview] = useState(false)
-
+  
   const [projectChoose, setProjectChoose]= useState()
+  const [modalUpload, setModalUpload] = useState(false)
+  const [templateProjectPlanUrl, setTemplateProjectPlanUrl] = useState()
+  const [templateProjectPlanFile, setTemplateProjectPlanFile] = useState()
+
+  //template Project plan
+  useEffect(() =>{
+    let isSubscribed = true
+    if (isSubscribed) {
+      database.templateProjectPlan.doc('template').onSnapshot(snapshot => {
+        if(snapshot.data()){
+          setTemplateProjectPlanUrl(snapshot.data().templateUrl)
+        }
+      })
+    }
+    return () => isSubscribed = false
+  },[])
 
   //Data Project
   useEffect(() =>{
@@ -172,6 +189,7 @@ export default function DashboardPMO() {
     },
     ]
 
+    const [formUpload] = Form.useForm()
     const [formCreate] = Form.useForm();
     const [formApprove] = Form.useForm();
     const [formReject] = Form.useForm();
@@ -357,6 +375,28 @@ export default function DashboardPMO() {
       setModalReview(false)
     }
 
+    function uploadTemplate(values){
+      try{
+        const uploadTask = storage.ref(`/templateProjectPlan/Template-ProjectPlan.${templateProjectPlanFile.name.split(".")[1]}`).put(templateProjectPlanFile)        
+        uploadTask.on('state-change', snapshot => {
+
+        }, () => {
+
+        }, () => {
+            uploadTask.snapshot.ref.getDownloadURL().then(url =>{
+                database.templateProjectPlan.doc("template").set({
+                    templateUrl: url
+                })
+                message.success("Success Upload File")
+            })
+        })
+        formUpload.resetFields()
+        setModalUpload(false)
+      } catch(err){
+        message.error("Failed Upload File")
+      }
+    }
+
     return(
     <>
       <Table 
@@ -364,9 +404,53 @@ export default function DashboardPMO() {
         dataSource={dataProject}
         size="small" 
         bordered 
-        title={() => <Button onClick={() => setModalCreate(true)} type="primary" shape="round">New Project</Button>}
+        title={() => {
+          return(
+            <>
+            <Space size="middle">
+              <Button onClick={()=> setModalCreate(true)} type="primary" shape="round">New Project</Button>
+              <Tooltip title="Upload Template">
+              <Button onClick={() => setModalUpload(true)} type="secondary" shape="round" icon={<UploadOutlined />}/>
+              </Tooltip>
+              <a href={templateProjectPlanUrl}>Download Template</a>
+            </Space>
+            </>
+          )
+        }}
         scroll={{y: 400 }}
       />
+      <Modal 
+      title="Template Project Plan" 
+      visible={modalUpload}
+      footer={null}
+      onCancel={() => setModalUpload(false)}
+      >
+        <Form
+          form={formUpload}
+          layout="vertical"
+          onFinish={uploadTemplate}
+          autoComplete="off"
+        >
+        <Form.Item
+          label="File Template Project Plan"
+          name="templateProjectPlan"
+          rules={[
+          {
+              required: true,
+              message: 'Please upload file Project Plan',
+          },
+          ]}
+        >
+          <Input type="file" onChange={e => setTemplateProjectPlanFile(e.target.files[0])}/>
+        </Form.Item>
+        <Form.Item>
+          <Button type="primary" htmlType="submit" className="w-100 text-center mt-3">
+            Submit
+          </Button>
+        </Form.Item>
+        </Form>
+      </Modal>
+
       <Modal 
       title="Create New Project" 
       visible={modalCreate}

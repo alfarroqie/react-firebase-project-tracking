@@ -19,6 +19,7 @@ const firestore = app.firestore()
 export const database = {
   projects: firestore.collection("projects"),
   users: firestore.collection("users"),
+  templateProjectPlan: firestore.collection("templateProjectPlan"),
   formatDoc: doc => {
     return { key: doc.id, ...doc.data() }
   },
